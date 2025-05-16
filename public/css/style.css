@@ -1,0 +1,213 @@
+/* Styles généraux */
+:root {
+    --primary-color: #6c5ce7;
+    --secondary-color: #a29bfe;
+    --text-color: #2d3436;
+    --light-gray: #dfe6e9;
+    --white: #ffffff;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f6fa;
+    color: var(--text-color);
+}
+
+/* Header et Navigation */
+.main-header {
+    background-color: var(--white);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-links a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--primary-color);
+}
+
+/* Page Discover */
+.discover-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.discover-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.discover-header h1 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.discover-subtitle {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.profiles-stack {
+    position: relative;
+    height: 600px;
+    margin: 0 auto;
+}
+
+.profile-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--white);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.profile-image {
+    height: 70%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.profile-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
+}
+
+.profile-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.5rem;
+    color: var(--white);
+    z-index: 1;
+}
+
+.profile-name {
+    font-size: 1.8rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.profile-details {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.profile-bio {
+    font-size: 0.9rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.profile-actions {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0 1rem;
+}
+
+.btn-action {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-pass {
+    background-color: var(--white);
+    color: #ff4757;
+}
+
+.btn-like {
+    background-color: var(--white);
+    color: #2ecc71;
+}
+
+.btn-action:hover {
+    transform: scale(1.1);
+}
+
+.btn-pass:hover {
+    background-color: #ff4757;
+    color: var(--white);
+}
+
+.btn-like:hover {
+    background-color: #2ecc71;
+    color: var(--white);
+}
+
+.no-profiles {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--white);
+    border-radius: 15px;
+    padding: 2rem;
+}
+
+.no-profiles-content {
+    color: #666;
+}
+
+.no-profiles-content i {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+/* Contenu principal */
+.main-content {
+    min-height: calc(100vh - 70px);
+    padding: 2rem 0;
+} 

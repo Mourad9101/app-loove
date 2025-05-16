@@ -1,0 +1,18 @@
+# Activation du module rewrite si disponible
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /Evergem3/
+
+    # Rediriger les requêtes vers des fichiers/dossiers existants
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Rediriger toutes les autres requêtes vers index.php
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Permettre l'accès aux dossiers statiques
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch> 
