@@ -21,7 +21,7 @@
                 <img src="<?= BASE_URL ?>/public/uploads/<?= htmlspecialchars($user['image']) ?>" 
                      class="card-img-top" 
                      alt="Photo de profil"
-                     onerror="this.src='<?= BASE_URL ?>/public/img/default-avatar.jpg'">
+                     onerror="this.src='<?= BASE_URL ?>/public/uploads/default.jpg'">
                 <div class="card-body">
                     <h5 class="card-title"><?= htmlspecialchars($user['first_name']) ?> <?= htmlspecialchars($user['last_name']) ?></h5>
                     <p class="card-text">

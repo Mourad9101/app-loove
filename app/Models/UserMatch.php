@@ -13,16 +13,36 @@ class UserMatch {
 
     public function createLike($userId, $likedUserId) {
         try {
+            error_log("=== Création d'un like de $userId vers $likedUserId ===");
+            
+            // Vérifier si le like existe déjà
+            $checkSql = "SELECT COUNT(*) as count FROM matches 
+                        WHERE user_id = :user_id AND liked_user_id = :liked_user_id";
+            
+            $stmt = $this->db->prepare($checkSql);
+            $stmt->execute([
+                ':user_id' => $userId,
+                ':liked_user_id' => $likedUserId
+            ]);
+            
+            if ($stmt->fetch(PDO::FETCH_ASSOC)['count'] > 0) {
+                error_log("Le like existe déjà");
+                return true;
+            }
+            
             $sql = "INSERT INTO matches (user_id, liked_user_id, created_at) 
                     VALUES (:user_id, :liked_user_id, NOW())";
             
             $stmt = $this->db->prepare($sql);
-            return $stmt->execute([
+            $success = $stmt->execute([
                 ':user_id' => $userId,
                 ':liked_user_id' => $likedUserId
             ]);
+            
+            error_log("Résultat de la création du like : " . ($success ? "Succès" : "Échec"));
+            return $success;
         } catch (\PDOException $e) {
-            error_log("Erreur lors de la création du like : " . $e->getMessage());
+            error_log("Erreur dans createLike : " . $e->getMessage());
             return false;
         }
     }
@@ -46,12 +66,16 @@ class UserMatch {
 
     public function isMatch($userId, $likedUserId) {
         try {
+            error_log("=== Vérification de match entre $userId et $likedUserId ===");
+            
             $sql = "SELECT COUNT(*) as count 
                     FROM matches m1 
                     INNER JOIN matches m2 ON m1.user_id = m2.liked_user_id 
-                    AND m1.liked_user_id = m2.user_id 
+                        AND m1.liked_user_id = m2.user_id 
                     WHERE m1.user_id = :user_id 
-                    AND m1.liked_user_id = :liked_user_id";
+                        AND m1.liked_user_id = :liked_user_id";
+            
+            error_log("Requête SQL : " . $sql);
             
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
@@ -60,36 +84,62 @@ class UserMatch {
             ]);
             
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result['count'] > 0;
+            $isMatch = $result['count'] > 0;
+            
+            error_log("Résultat du match : " . ($isMatch ? "OUI" : "NON"));
+            return $isMatch;
         } catch (\PDOException $e) {
-            error_log("Erreur lors de la vérification du match : " . $e->getMessage());
+            error_log("Erreur dans isMatch : " . $e->getMessage());
             return false;
         }
     }
 
     public function getUserMatches($userId) {
         try {
-            $sql = "SELECT DISTINCT u.* 
-                    FROM users u 
-                    INNER JOIN matches m1 ON u.id = m1.liked_user_id 
-                    INNER JOIN matches m2 ON m1.user_id = m2.liked_user_id 
-                    AND m1.liked_user_id = m2.user_id 
-                    WHERE m1.user_id = :user_id 
-                    ORDER BY m1.created_at DESC";
+            error_log("=== DÉBUT getUserMatches pour l'utilisateur $userId ===");
+            
+            // Requête optimisée pour récupérer les matchs mutuels
+            $sql = "SELECT DISTINCT 
+                    u.*,
+                    m1.created_at as match_date,
+                    COALESCE(last_msg.last_message_date, m1.created_at) as interaction_date
+                FROM users u
+                INNER JOIN matches m1 ON (m1.liked_user_id = u.id AND m1.user_id = :user_id)
+                INNER JOIN matches m2 ON (m2.user_id = m1.liked_user_id AND m2.liked_user_id = m1.user_id)
+                LEFT JOIN (
+                    SELECT 
+                        CASE 
+                            WHEN sender_id = :user_id THEN receiver_id
+                            ELSE sender_id
+                        END as other_user_id,
+                        MAX(created_at) as last_message_date
+                    FROM messages
+                    WHERE sender_id = :user_id OR receiver_id = :user_id
+                    GROUP BY other_user_id
+                ) last_msg ON last_msg.other_user_id = u.id
+                WHERE m1.user_id = :user_id
+                ORDER BY interaction_date DESC";
+            
+            error_log("Requête SQL : " . $sql);
             
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':user_id' => $userId]);
             
             $matches = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Nombre de matchs trouvés : " . count($matches));
             
-            // Retirer les mots de passe des résultats
+            // Retirer les mots de passe et ajouter des informations supplémentaires
             foreach ($matches as &$match) {
                 unset($match['password']);
+                $match['has_messaged'] = !is_null($match['interaction_date']);
+                error_log("Match trouvé : " . print_r($match, true));
             }
             
+            error_log("=== FIN getUserMatches ===");
             return $matches;
         } catch (\PDOException $e) {
-            error_log("Erreur lors de la récupération des matchs : " . $e->getMessage());
+            error_log("Erreur dans getUserMatches : " . $e->getMessage());
+            error_log("Trace : " . $e->getTraceAsString());
             return [];
         }
     }

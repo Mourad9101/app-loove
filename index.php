@@ -55,6 +55,8 @@ try {
     $router->addRoute('GET', BASE_URL . '/discover', 'MatchController@discover');
     $router->addRoute('POST', BASE_URL . '/matches/like', 'MatchController@like');
     $router->addRoute('POST', BASE_URL . '/matches/pass', 'MatchController@pass');
+    $router->addRoute('POST', BASE_URL . '/matches/load-more', 'MatchController@loadMoreProfiles');
+    $router->addRoute('POST', BASE_URL . '/matches/unmatch', 'MatchController@unmatch');
     $router->addRoute('GET', BASE_URL . '/messages', 'MessageController@index');
     $router->addRoute('GET', BASE_URL . '/messages/{id}', 'MessageController@show');
     $router->addRoute('POST', BASE_URL . '/messages/send', 'MessageController@send');

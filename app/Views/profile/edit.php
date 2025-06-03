@@ -88,7 +88,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> 
 
 <style>
 .form-control:focus {
@@ -97,13 +97,13 @@
 }
 
 .btn-primary {
-    background-color: #4299e1;
-    border-color: #4299e1;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 .btn-primary:hover {
-    background-color: #3182ce;
-    border-color: #3182ce;
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

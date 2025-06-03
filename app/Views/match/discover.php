@@ -1,5 +1,35 @@
 <?php require_once APP_PATH . '/Views/layout/header.php';
-error_log("Vue discover.php - Données reçues : " . print_r($users, true)); ?>
+
+// Débogage détaillé
+error_log("Type de \$users : " . gettype($users));
+error_log("Contenu de \$users : " . print_r($users, true));
+
+// Vérification et conversion si nécessaire
+if (!is_array($users)) {
+    if (is_string($users)) {
+        $users = json_decode($users, true);
+    } else {
+        $users = [];
+    }
+}
+
+// Vérification après conversion
+error_log("Type de \$users après conversion : " . gettype($users));
+error_log("Contenu de \$users après conversion : " . print_r($users, true)); ?>
+
+<?php
+// Définit une fonction pour obtenir la couleur d'une pierre précieuse
+function getGemColor($gemstone) {
+    switch ($gemstone) {
+        case 'Diamond': return '#b9f2ff'; // Bleu pâle
+        case 'Ruby': return '#e0115f'; // Rouge rubis
+        case 'Emerald': return '#50c878'; // Vert émeraude
+        case 'Sapphire': return '#0f52ba'; // Bleu saphir
+        case 'Amethyst': return '#9966cc'; // Violet améthyste
+        default: return '#cccccc'; // Couleur par défaut
+    }
+}
+?>
 
 <!-- Debug info -->
 <div class="debug-info-profiles">
@@ -10,340 +40,122 @@ error_log("Vue discover.php - Données reçues : " . print_r($users, true)); ?>
 </div>
 
 <div class="discover-container">
-    <div class="discover-header">
-        <h1>Découvrez de nouveaux profils</h1>
-        <p class="discover-subtitle">Faites glisser vers la droite pour liker, vers la gauche pour passer</p>
-    </div>
-
-    <?php if (empty($users)): ?>
-        <div class="no-profiles">
-            <div class="no-profiles-content">
-                <i class="fas fa-search fa-3x mb-3"></i>
-                <h3>Plus personne à proximité</h3>
-                <p>Revenez plus tard pour découvrir de nouveaux profils !</p>
-                <?php error_log("Aucun profil trouvé dans la vue discover.php"); ?>
-            </div>
-        </div>
-    <?php else: ?>
-        <?php error_log("Nombre de profils à afficher : " . count($users)); ?>
-        <div class="profiles-stack">
-            <?php foreach ($users as $user): ?>
-                <div class="profile-card" data-user-id="<?= htmlspecialchars($user['id']) ?>">
-                    <div class="profile-image" style="background-image: url('<?= BASE_URL ?>/public/uploads/<?= htmlspecialchars($user['image']) ?>'), url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNFMkU4RjAiLz48cGF0aCBkPSJNMjAwIDIyMEMyNDQuMTgyIDIyMCAyODAgMTg0LjE4MiAyODAgMTQwQzI4MCA5NS44MTc1IDI0NC4xODIgNjAgMjAwIDYwQzE1NS44MTcgNjAgMTIwIDk1LjgxNzUgMTIwIDE0MEMxMjAgMTg0LjE4MiAxNTUuODE3IDIyMCAyMDAgMjIwWiIgZmlsbD0iI0E2QjBCRCIvPjxwYXRoIGQ9Ik0zMTIuNzE5IDM0MEMzMTIuNzE5IDI5Ni41ODkgMjYxLjkzMSAyNjEuNDI5IDIwMCAyNjEuNDI5QzEzOC4wNjkgMjYxLjQyOSA4Ny4yODE0IDI5Ni41ODkgODcuMjgxNCAzNDAiIHN0cm9rZT0iI0E2QjBCRCIgc3Ryb2tlLXdpZHRoPSI0MCIvPjwvc3ZnPg==')">
-                        <div class="profile-gradient"></div>
+    <div class="profiles-stack" id="profiles-stack">
+        <?php foreach ($users as $index => $user): ?>
+            <div class="profile-card" data-user-id="<?= htmlspecialchars($user['id'] ?? '') ?>" data-index="<?= $index ?>" style="z-index: <?= count($users) - $index ?>">
+                <div class="profile-image" style="background-image: url('<?= BASE_URL ?>/uploads/<?= htmlspecialchars($user['image'] ?? '') ?>')">
+                    <div class="profile-gradient"></div>
+                    <div class="profile-distance">
+                        <i class="fas fa-location-dot"></i>
+                        <?= isset($user['distance']) ? number_format($user['distance'], 1) . ' km' : '< 100 km' ?>
                     </div>
-                    
-                    <div class="profile-info">
-                        <h2 class="profile-name">
-                            <?= htmlspecialchars($user['first_name']) ?>, <?= $user['age'] ?>
-                        </h2>
-                        
-                        <div class="profile-details">
-                            <p><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($user['city']) ?></p>
-                            <p class="profile-gemstone">
-                                <i class="fas fa-gem"></i> <?= htmlspecialchars($user['gemstone']) ?>
-                            </p>
-                        </div>
-
-                        <?php if (!empty($user['bio'])): ?>
-                            <p class="profile-bio"><?= nl2br(htmlspecialchars($user['bio'])) ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="profile-actions">
-                        <button class="btn-action btn-pass" data-user-id="<?= htmlspecialchars($user['id']) ?>">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <button class="btn-action btn-like" data-user-id="<?= htmlspecialchars($user['id']) ?>">
-                            <i class="fas fa-gem"></i>
-                        </button>
+                    <div class="profile-header-overlay">
+                         <div class="profile-name"><?= htmlspecialchars($user['first_name'] ?? '') ?><?= isset($user['age']) ? ', ' . htmlspecialchars($user['age']) : '' ?></div>
+                         <div class="profile-location"><?= strtoupper(htmlspecialchars($user['city'] ?? '')) ?><?= isset($user['country']) ? ', ' . strtoupper(htmlspecialchars($user['country'] ?? '')) : '' ?></div>
                     </div>
                 </div>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
+                <div class="profile-content">
+                    <div class="profile-bottom-drag"></div>
+                    
+                    <?php /* Section About me (Bio) - Rendu déroulant */ ?>
+                    <div class="profile-about-title">About me</div>
+                    <div class="profile-bio"><?= htmlspecialchars($user['bio'] ?? '') ?></div>
+                    
+                    <?php
+                    $interests = [];
+                    if (isset($user['interests']) && is_string($user['interests'])) {
+                        $interests = json_decode($user['interests'], true);
+                        if (!is_array($interests)) $interests = [];
+                    } else if (isset($user['interests']) && is_array($user['interests'])) {
+                         $interests = $user['interests'];
+                    }
+                    ?>
+                    <?php if (!empty($interests)): ?>
+                        <div class="profile-interests-title">Interest</div>
+                        <div class="profile-interests">
+                            <?php foreach ($interests as $interest): ?>
+                                <span class="interest-tag"><?= htmlspecialchars($interest) ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                     <div class="profile-gemstone-bottom">
+                         <i class="fas fa-gem" style="color:<?= getGemColor($user['gemstone'] ?? 'Diamond') ?>"></i>
+                     </div>
+                 </div>
+                 <div class="profile-actions">
+                     <button class="btn-action btn-pass"><i class="fas fa-times"></i></button>
+                     <button class="btn-action btn-gem"><i class="fas fa-gem"></i></button>
+                     <button class="btn-action btn-like"><i class="fas fa-heart"></i></button>
+                 </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
 </div>
-
-<style>
-/* Styles de débogage */
-.debug-info-profiles {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.8);
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 12px;
-    z-index: 9999;
-}
-
-.discover-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.discover-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.discover-subtitle {
-    color: #666;
-    font-size: 0.9rem;
-}
-
-.profiles-stack {
-    position: relative;
-    height: 600px;
-}
-
-.profile-card {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.3s ease-out;
-}
-
-.profile-image {
-    height: 70%;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-}
-
-.profile-gradient {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
-}
-
-.profile-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 20px;
-    color: white;
-    z-index: 1;
-}
-
-.profile-name {
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-}
-
-.profile-details {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 10px;
-    font-size: 0.9rem;
-}
-
-.profile-bio {
-    font-size: 0.9rem;
-    margin-bottom: 20px;
-    opacity: 0.9;
-}
-
-.profile-actions {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 0 20px;
-}
-
-.btn-action {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.btn-pass {
-    background-color: #fff;
-    color: #dc3545;
-    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
-}
-
-.btn-like {
-    background-color: #fff;
-    color: #4299e1;
-    box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
-}
-
-.btn-action:hover {
-    transform: scale(1.1);
-}
-
-.btn-pass:hover {
-    background-color: #dc3545;
-    color: white;
-}
-
-.btn-like:hover {
-    background-color: #4299e1;
-    color: #fff;
-}
-
-.no-profiles {
-    height: 400px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background: #f8f9fa;
-    border-radius: 15px;
-}
-
-.no-profiles-content {
-    color: #6c757d;
-}
-
-.no-profiles-content i {
-    margin-bottom: 15px;
-}
-
-@keyframes swipeLeft {
-    to {
-        transform: translateX(-150%) rotate(-30deg);
-        opacity: 0;
-    }
-}
-
-@keyframes swipeRight {
-    to {
-        transform: translateX(150%) rotate(30deg);
-        opacity: 0;
-    }
-}
-
-.swiping-left {
-    animation: swipeLeft 0.5s ease-out forwards;
-}
-
-.swiping-right {
-    animation: swipeRight 0.5s ease-out forwards;
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Script chargé');
-    const cards = document.querySelectorAll('.profile-card');
-    console.log('Nombre de cartes trouvées:', cards.length);
-    
-    let currentCardIndex = cards.length - 1;
+    console.log('Script discover.php démarré');
+    const stack = document.getElementById('profiles-stack');
+    let isDragging = false;
+    let startX = 0;
+    let currentX = 0;
 
-    cards.forEach((card, index) => {
-        console.log('Configuration de la carte:', index);
-        card.style.zIndex = cards.length - index;
+    function handleStart(e) {
+        const card = document.querySelector('.profile-card[data-index="0"]');
+        if (!card) return;
         
-        let startX = 0;
-        let currentX = 0;
-        let isDragging = false;
+        isDragging = true;
+        startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+        card.style.transition = 'none';
+    }
 
-        card.addEventListener('mousedown', startDragging);
-        card.addEventListener('touchstart', e => {
-            startDragging(e.touches[0]);
-        });
+    function handleMove(e) {
+        if (!isDragging) return;
+        
+        const card = document.querySelector('.profile-card[data-index="0"]');
+        if (!card) return;
+        
+        e.preventDefault();
+        const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+        currentX = clientX - startX;
+        
+        const rotate = currentX * 0.05; // Rotation légèrement réduite pour un effet plus doux
+        card.style.transform = `translateX(${currentX}px) rotate(${rotate}deg)`;
 
-        function startDragging(e) {
-            isDragging = true;
-            startX = e.clientX;
-            card.style.transition = 'none';
+        // Optionnel: Gérer l'opacité ou un indicateur de swipe ici si désiré
+    }
+
+    function handleEnd() {
+        if (!isDragging) return;
+        
+        const card = document.querySelector('.profile-card[data-index="0"]');
+        if (!card) return;
+        
+        isDragging = false;
+        const threshold = window.innerWidth * 0.25; // Seuil de swipe ajusté
+        
+        if (Math.abs(currentX) > threshold) {
+            const isLike = currentX > 0;
+            handleSwipe(card, isLike);
+        } else {
+            // Revenir à la position initiale
+            card.style.transform = '';
+            card.style.transition = 'transform 0.3s ease';
         }
+        
+        currentX = 0;
+    }
 
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('touchmove', e => {
-            if (isDragging) e.preventDefault();
-            drag(e.touches[0]);
-        });
-
-        function drag(e) {
-            if (!isDragging) return;
-            
-            currentX = e.clientX - startX;
-            const rotation = currentX / 10;
-            
-            card.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
-            
-            const likeButton = card.querySelector('.btn-like');
-            const passButton = card.querySelector('.btn-pass');
-            
-            if (currentX > 0) {
-                likeButton.style.transform = `scale(${1 + currentX/500})`;
-                passButton.style.transform = 'scale(1)';
-            } else if (currentX < 0) {
-                passButton.style.transform = `scale(${1 - currentX/500})`;
-                likeButton.style.transform = 'scale(1)';
-            }
-        }
-
-        document.addEventListener('mouseup', endDragging);
-        document.addEventListener('touchend', endDragging);
-
-        function endDragging() {
-            if (!isDragging) return;
-            isDragging = false;
-            
-            const threshold = 100;
-            
-            if (currentX > threshold) {
-                like(card);
-            } else if (currentX < -threshold) {
-                pass(card);
-            } else {
-                card.style.transition = 'transform 0.3s ease';
-                card.style.transform = '';
-                
-                const likeButton = card.querySelector('.btn-like');
-                const passButton = card.querySelector('.btn-pass');
-                likeButton.style.transform = '';
-                passButton.style.transform = '';
-            }
-        }
-    });
-
-    document.querySelectorAll('.btn-like').forEach(button => {
-        button.addEventListener('click', () => {
-            const card = button.closest('.profile-card');
-            like(card);
-        });
-    });
-
-    document.querySelectorAll('.btn-pass').forEach(button => {
-        button.addEventListener('click', () => {
-            const card = button.closest('.profile-card');
-            pass(card);
-        });
-    });
-
-    function like(card) {
+    function handleSwipe(card, isLike) {
         const userId = card.dataset.userId;
-        card.classList.add('swiping-right');
+        const endpoint = isLike ? 'like' : 'pass';
         
-        fetch(`${BASE_URL}/matches/like`, {
+        card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+        card.style.transform = `translateX(${isLike ? '150%' : '-150%'}) rotate(${isLike ? '15deg' : '-15deg'})`;
+        card.style.opacity = 0;
+
+        // Envoyer la requête au backend
+        fetch(`<?= BASE_URL ?>/matches/${endpoint}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -353,110 +165,85 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.match) {
-                showMatchNotification();
+                // Gérer le cas d'un match
+                console.log('Match trouvé !', data.match);
+                // Vous pourriez appeler ici une fonction pour afficher une modale de match, etc.
+                showMatchNotification(); // Appel à la fonction existante
             }
+        })
+        .catch(error => {
+            console.error(`Erreur lors de l'action ${endpoint} pour l'utilisateur ${userId}:`, error);
+            // Gérer l'erreur (ex: réafficher la carte ou montrer un message d'erreur)
         });
-
-        removeCard(card);
-    }
-
-    function pass(card) {
-        const userId = card.dataset.userId;
-        card.classList.add('swiping-left');
         
-        fetch(`${BASE_URL}/matches/pass`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `user_id=${userId}`
-        });
-
-        removeCard(card);
-    }
-
-    function removeCard(card) {
-        card.addEventListener('animationend', () => {
+        // Supprimer la carte après l'animation
+        setTimeout(() => {
             card.remove();
-            currentCardIndex--;
-            
-            if (currentCardIndex < 0) {
-                document.querySelector('.profiles-stack').innerHTML = `
-                    <div class="no-profiles">
-                        <div class="no-profiles-content">
-                            <i class="fas fa-search fa-3x mb-3"></i>
-                            <h3>Plus personne à proximité</h3>
-                            <p>Revenez plus tard pour découvrir de nouveaux profils !</p>
-                        </div>
-                    </div>
-                `;
-            }
-        });
+            updateCardsIndex();
+        }, 500); // Correspond à la durée de la transition
     }
 
-    function showMatchNotification() {
-        // Créer une notification de match
-        const notification = document.createElement('div');
-        notification.className = 'match-notification';
-        notification.innerHTML = `
-            <div class="match-content">
-                <i class="fas fa-heart fa-3x mb-3"></i>
-                <h3>C'est un match !</h3>
-                <p>Vous pouvez maintenant commencer à discuter</p>
-                <button class="btn btn-primary mt-3" onclick="window.location.href='${BASE_URL}/matches'">
-                    Voir mes matchs
-                </button>
-            </div>
-        `;
-        document.body.appendChild(notification);
+    function updateCardsIndex() {
+        document.querySelectorAll('.profile-card').forEach((card, index) => {
+            card.dataset.index = index;
+            card.style.zIndex = document.querySelectorAll('.profile-card').length - index;
+            // Optionnel: Ajouter d'autres styles d'empilement ici (ex: scale, légère translation)
+        });
+         // Optionnel: Afficher un message si plus de cartes
+         if (document.querySelectorAll('.profile-card').length === 0) {
+             const discoverContainer = document.querySelector('.discover-container');
+             if (discoverContainer) {
+                 discoverContainer.innerHTML = `<div class="no-profiles">
+    <i class="fas fa-box-open"></i>
+    <p>Aucun nouveau profil pour l'instant.<br>Revenez plus tard !</p>
+</div>`;
+             }
+         }
+    }
 
-        // Ajouter le style pour la notification
-        const style = document.createElement('style');
-        style.textContent = `
-            .match-notification {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-                animation: fadeIn 0.3s ease;
-            }
+    // Événements tactiles (pour mobile)
+    stack.addEventListener('touchstart', handleStart, { passive: false });
+    stack.addEventListener('touchmove', handleMove, { passive: false });
+    stack.addEventListener('touchend', handleEnd);
 
-            .match-content {
-                background: white;
-                padding: 40px;
-                border-radius: 15px;
-                text-align: center;
-                animation: scaleIn 0.3s ease;
-            }
+    // Événements souris (pour desktop)
+    stack.addEventListener('mousedown', handleStart);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleEnd);
 
-            .match-content i {
-                color: #e74c3c;
-            }
+    // Gestion des clics sur les boutons d'action
+    document.addEventListener('click', function(e) {
+        // Utiliser event delegation pour les boutons
+        const button = e.target.closest('.btn-action');
+        if (!button) return; // Si le clic n'était pas sur un bouton d'action ou son enfant
+        
+        const card = button.closest('.profile-card');
+        // S'assurer que le bouton cliqué est sur la carte du dessus
+        if (!card || card.dataset.index !== '0') return;
+        
+        e.preventDefault(); // Empêcher le comportement par défaut (ex: soumission de formulaire si les boutons étaient dans un form)
+        e.stopPropagation(); // Empêcher l'événement de remonter à la pile et de déclencher un drag/swipe
+        
+        const isLike = button.classList.contains('btn-like');
+        handleSwipe(card, isLike);
+    });
 
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-
-            @keyframes scaleIn {
-                from { transform: scale(0.8); }
-                to { transform: scale(1); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Fermer la notification au clic en dehors
-        notification.addEventListener('click', (e) => {
-            if (e.target === notification) {
-                notification.remove();
+    // Gérer le déroulement de la bio
+    document.querySelectorAll('.profile-about-title').forEach(title => {
+        title.addEventListener('click', function() {
+            const aboutSection = this.closest('.profile-about-section');
+            if (aboutSection) {
+                aboutSection.classList.toggle('open');
             }
         });
+    });
+
+    // Fonction existante pour montrer une notification de match (peut être améliorée)
+    function showMatchNotification() {
+        console.log('Match!');
+        // TODO: Implémenter une animation ou modale de match ici
     }
 });
-</script> 
+</script>
+
+<?php require_once APP_PATH . '/Views/layout/footer.php'; ?> 

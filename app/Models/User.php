@@ -95,7 +95,7 @@ class User {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user && password_verify($password, $user['password'])) {
-                unset($user['password']); // Ne jamais renvoyer le mot de passe
+                unset($user['password']);
                 return $user;
             }
             
@@ -128,7 +128,7 @@ class User {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($user) {
-                unset($user['password']); // Ne jamais renvoyer le mot de passe
+                unset($user['password']);
             }
             
             return $user;
@@ -210,38 +210,41 @@ class User {
         try {
             error_log("=== DÉBUT getPotentialMatches pour l'utilisateur $userId ===");
             
+            // Récupérer tous les utilisateurs déjà interagis (likés)
+            $excludedUsers = [$userId];
+            
             // Vérifier si la table matches existe
             $checkTable = "SHOW TABLES LIKE 'matches'";
             $stmt = $this->db->prepare($checkTable);
             $stmt->execute();
             $tableExists = $stmt->rowCount() > 0;
-            error_log("Table matches existe : " . ($tableExists ? "Oui" : "Non"));
-
-            // Récupérer d'abord tous les utilisateurs déjà likés
-            $likedUsers = [];
+            
             if ($tableExists) {
+                // Récupérer les utilisateurs likés
                 $likedQuery = "SELECT liked_user_id FROM matches WHERE user_id = :userId";
                 $stmt = $this->db->prepare($likedQuery);
                 $stmt->execute([':userId' => $userId]);
                 $likedUsers = $stmt->fetchAll(PDO::FETCH_COLUMN);
-                error_log("Utilisateurs déjà likés : " . implode(", ", $likedUsers));
+                $excludedUsers = array_merge($excludedUsers, $likedUsers);
             }
 
             // Construire la requête principale
-            $sql = "SELECT * FROM users WHERE id != :userId AND has_completed_onboarding = 1";
+            $sql = "SELECT * FROM users WHERE has_completed_onboarding = 1";
             
-            // Ajouter la condition pour exclure les utilisateurs déjà likés
-            if (!empty($likedUsers)) {
-                $sql .= " AND id NOT IN (" . implode(",", $likedUsers) . ")";
+            // Ajouter la condition pour exclure les utilisateurs déjà interagis
+            if (!empty($excludedUsers)) {
+                $placeholders = str_repeat('?,', count($excludedUsers) - 1) . '?';
+                $sql .= " AND id NOT IN ($placeholders)";
             }
             
-            $sql .= " ORDER BY created_at DESC LIMIT 10";
+            // Ajouter des conditions de filtrage supplémentaires (âge, localisation, etc.)
+            $sql .= " ORDER BY RAND() LIMIT 10";
             
             error_log("Requête SQL : " . $sql);
-            error_log("Paramètres : " . print_r([':userId' => $userId], true));
+            error_log("Paramètres : " . print_r($excludedUsers, true));
             
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([':userId' => $userId]);
+            $stmt->execute($excludedUsers);
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             error_log("Nombre de résultats trouvés : " . count($results));

@@ -1,19 +1,33 @@
 <div class="matches-container">
+    <div class="page-header">
     <h1>Vos Matchs</h1>
+        <p>Découvrez vos connexions mutuelles</p>
+    </div>
 
     <?php if (empty($matches)): ?>
         <div class="no-matches">
+            <div class="no-matches-content">
+                <i class="fas fa-heart fa-3x"></i>
             <p>Vous n'avez pas encore de matchs.</p>
-            <a href="<?= APP_URL ?>/discover" class="btn btn-primary">Découvrir des profils</a>
+                <a href="<?= APP_URL ?>/discover" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Découvrir des profils
+                </a>
+            </div>
         </div>
     <?php else: ?>
         <div class="matches-grid">
             <?php foreach ($matches as $match): ?>
                 <div class="match-card" data-user-id="<?= $match['id'] ?>">
                     <div class="match-image">
+                        <?php if (!$match['has_messaged']): ?>
+                            <div class="new-match-badge">
+                                <i class="fas fa-star"></i> Nouveau match
+                            </div>
+                        <?php endif; ?>
                         <img src="<?= APP_URL ?>/uploads/<?= htmlspecialchars($match['image']) ?>" 
                              alt="Photo de <?= htmlspecialchars($match['first_name']) ?>"
                              class="profile-image">
+                        <div class="match-image-overlay"></div>
                     </div>
                     
                     <div class="match-info">
@@ -24,6 +38,9 @@
                         </p>
                         <p class="match-gemstone">
                             <i class="fas fa-gem"></i> <?= htmlspecialchars($match['gemstone']) ?>
+                        </p>
+                        <p class="match-date">
+                            Match le <?= (new DateTime($match['match_date']))->format('d/m/Y') ?>
                         </p>
                     </div>
                     
@@ -42,34 +59,36 @@
 </div>
 
 <style>
+/* Styles spécifiques à la page des matchs */
 .matches-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
+    background-color: transparent;
+}
+
+.page-header h1 {
+    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
+}
+
+.page-header p {
+    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
 }
 
 .matches-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 2rem;
-    margin-top: 2rem;
 }
 
 .match-card {
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-}
-
-.match-card:hover {
-    transform: translateY(-5px);
+    position: relative;
+    border: none;
+    background: var(--card-background);
+    transition: all 0.3s ease;
 }
 
 .match-image {
     position: relative;
     padding-top: 100%;
+    overflow: hidden;
 }
 
 .match-image img {
@@ -79,52 +98,87 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
 }
 
-.match-info {
-    padding: 1rem;
-    text-align: center;
+.match-image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1));
+    pointer-events: none;
 }
 
-.match-details {
-    color: #666;
-    margin: 0.5rem 0;
+.match-card:hover .match-image img {
+    transform: scale(1.05);
 }
 
-.match-gemstone {
-    color: var(--accent-color);
-    font-weight: 500;
-}
-
-.match-actions {
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem;
-    border-top: 1px solid #eee;
-}
-
-.btn-unmatch {
-    background-color: transparent;
-    color: var(--error-color);
-    padding: 0.5rem;
-}
-
-.btn-unmatch:hover {
-    background-color: var(--error-color);
+.new-match-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--primary-color);
     color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
 }
 
 .no-matches {
-    text-align: center;
-    padding: 3rem;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
 }
 
-.no-matches p {
+.no-matches-content {
+    text-align: center;
+    padding: 2rem;
+}
+
+.no-matches-content i {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.no-matches-content p {
+    font-size: 1.1rem;
+    color: var(--text-muted);
     margin-bottom: 1.5rem;
-    color: #666;
+    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
+}
+
+.match-info h3 {
+    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
+}
+
+.match-info p {
+    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
+}
+
+@media (max-width: 768px) {
+    .matches-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .matches-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 
@@ -141,27 +195,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = button.closest('.match-card');
             
             try {
-                const response = await fetch('<?= APP_URL ?>/unmatch', {
+                const response = await fetch('<?= BASE_URL ?>/matches/unmatch', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: JSON.stringify({ user_id: userId })
+                    body: `user_id=${userId}`
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    card.style.transform = 'scale(0)';
+                    card.style.transform = 'scale(0.8)';
+                    card.style.opacity = '0';
                     setTimeout(() => {
                         card.remove();
                         if (document.querySelectorAll('.match-card').length === 0) {
                             location.reload();
                         }
                     }, 300);
+                } else {
+                    alert('Une erreur est survenue');
                 }
             } catch (error) {
-                showAlert('Une erreur est survenue', 'error');
+                console.error('Erreur lors du unmatch:', error);
+                alert('Une erreur est survenue');
             }
         });
     });

@@ -89,7 +89,7 @@ class AuthController extends Controller {
             $this->redirect('/register');
             return;
         }
-
+        
         // Vérifier si l'email existe déjà
         if ($this->userModel->findByEmail($email)) {
             $_SESSION['error'] = "Cet email est déjà utilisé";

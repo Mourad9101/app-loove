@@ -47,15 +47,21 @@ class MatchController extends Controller {
         }
 
         $potentialMatches = $this->userModel->getPotentialMatches($_SESSION['user_id']);
+        error_log("Type de potentialMatches : " . gettype($potentialMatches));
         error_log("Profils récupérés dans discover : " . print_r($potentialMatches, true));
-        error_log("Nombre de profils trouvés : " . count($potentialMatches));
+        error_log("Nombre de profils trouvés : " . (is_array($potentialMatches) ? count($potentialMatches) : 'N/A'));
 
         // Vérifier si BASE_URL est défini
         if (!defined('BASE_URL')) {
             error_log("ATTENTION: BASE_URL n'est pas défini!");
             define('BASE_URL', '/Evergem3');
         }
-        error_log("BASE_URL : " . BASE_URL);
+
+        // S'assurer que potentialMatches est un tableau
+        if (!is_array($potentialMatches)) {
+            error_log("ERREUR: potentialMatches n'est pas un tableau!");
+            $potentialMatches = [];
+        }
 
         // Debug des variables disponibles
         error_log("Variables disponibles pour la vue : " . print_r([
@@ -76,21 +82,28 @@ class MatchController extends Controller {
     public function like(): void {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $likedUserId = (int)($_POST['user_id'] ?? 0);
-            error_log("Tentative de like - User ID: " . $_SESSION['user_id'] . " like User ID: " . $likedUserId);
+            error_log("=== DÉBUT like() - User " . $_SESSION['user_id'] . " like User " . $likedUserId . " ===");
             
             if ($likedUserId > 0) {
+                // Créer le like
                 $success = $this->matchModel->createLike($_SESSION['user_id'], $likedUserId);
+                error_log("Création du like : " . ($success ? "Succès" : "Échec"));
                 
                 if ($success) {
+                    // Vérifier si c'est un match mutuel
                     $isMatch = $this->matchModel->isMatch($_SESSION['user_id'], $likedUserId);
+                    error_log("Est-ce un match ? " . ($isMatch ? "OUI" : "NON"));
+                    
                     $this->json([
                         'success' => true,
                         'match' => $isMatch
                     ]);
+                    error_log("=== FIN like() - Succès ===");
                     return;
                 }
             }
             
+            error_log("=== FIN like() - Échec ===");
             $this->json([
                 'success' => false,
                 'error' => 'Une erreur est survenue'
@@ -131,6 +144,25 @@ class MatchController extends Controller {
             $this->json([
                 'success' => false,
                 'error' => 'Une erreur est survenue'
+            ]);
+        }
+    }
+
+    public function loadMoreProfiles(): void {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $offset = (int)($_POST['offset'] ?? 0);
+            $limit = (int)($_POST['limit'] ?? 10);
+            
+            $potentialMatches = $this->userModel->getPotentialMatches(
+                $_SESSION['user_id'],
+                $offset,
+                $limit
+            );
+            
+            $this->json([
+                'success' => true,
+                'profiles' => $potentialMatches,
+                'hasMore' => count($potentialMatches) === $limit
             ]);
         }
     }
