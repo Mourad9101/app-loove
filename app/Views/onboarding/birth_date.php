@@ -24,7 +24,7 @@
         <button type="submit" style="
             width: 100%;
             padding: 15px 20px;
-            background-color: #4299e1;
+            background-color: #6c5ce7;
             color: white;
             border: none;
             border-radius: 12px;
@@ -37,22 +37,49 @@
 </form>
 
 <style>
+body, .onboarding-bg {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.onboarding-card, .birthdate-card {
+    max-width: 500px;
+    margin: 40px auto 0 auto;
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.10);
+    padding: 2.5rem 2rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 input[type="date"]:hover {
-    border-color: #4299e1;
+    border-color: #a259e6;
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-input[type="date"]:focus {
-    outline: none;
-    border-color: #4299e1;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+input[type="date"]:focus, input[type="text"]:focus {
+    border-color: #6c5ce7;
+    box-shadow: 0 0 0 3px #6c5ce766;
 }
 
-button[type="submit"]:hover {
-    background-color: #3182ce;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+button[type="submit"] {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #6c5ce7;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+    background-color: #a29bfe;
 }
 </style>
 

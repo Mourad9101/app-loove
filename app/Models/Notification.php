@@ -12,7 +12,7 @@ class Notification extends Model {
         $sql = "SELECT n.*, u.image, u.first_name, u.last_name
                 FROM notifications n 
                 LEFT JOIN users u ON n.from_user_id = u.id 
-                WHERE n.user_id = ? 
+                WHERE n.user_id = ? AND n.read_at IS NULL
                 ORDER BY n.created_at DESC 
                 LIMIT $limit";
         return $this->query($sql, [$userId]);

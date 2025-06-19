@@ -3,45 +3,49 @@
 ?>
 
 <div class="auth-container">
-    <div class="logo">
-        <img src="<?= BASE_URL ?>/public/images/Logo Evergem.png" alt="Logo" class="logo-img">
-    </div>
     <div class="auth-content">
+        <img src="<?= BASE_URL ?>/public/images/Logo Evergem.png" alt="Logo" class="logo-img">
         <h1>Welcome to EverGem</h1>
         <p class="tagline">Find your precious one</p>
         
         <div class="cta-buttons">
-            <button id="toggleLoginForm" class="btn btn-primary btn-lg">Login</button>
+            <button id="openLoginModal" class="btn btn-primary btn-lg">Login</button>
             <a href="<?= BASE_URL ?>/login/google" class="btn btn-outline-primary btn-lg">Login with Google</a>
         </div>
 
-        <div id="classicLoginForm" class="auth-box" style="display: none;">
-            <h2>Connexion</h2>
-            <?php if (isset($_SESSION['error'])): ?>
-                <div class="alert alert-danger" role="alert">
-                    <?= $_SESSION['error'] ?>
+        <!-- Modale de connexion -->
+        <div id="loginModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <button class="modal-close" id="closeLoginModal" aria-label="Fermer">&times;</button>
+                <div class="auth-box" style="margin-top:0;">
+                    <h2>Connexion</h2>
+                    <?php if (isset($_SESSION['error'])): ?>
+                        <div class="alert alert-danger" role="alert">
+                            <?= $_SESSION['error'] ?>
+                        </div>
+                        <?php unset($_SESSION['error']); ?>
+                    <?php endif; ?>
+                    <?php if (isset($_SESSION['success'])): ?>
+                        <div class="alert alert-success" role="alert">
+                            <?= $_SESSION['success'] ?>
+                        </div>
+                        <?php unset($_SESSION['success']); ?>
+                    <?php endif; ?>
+                    <form action="<?= BASE_URL ?>/login" method="POST">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" class="form-control" required value="<?= htmlspecialchars($_SESSION['old_input']['email'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Mot de passe</label>
+                            <input type="password" id="password" name="password" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+                    </form>
+                    <div class="auth-links">
+                        <a href="<?= BASE_URL ?>/forgot-password">Mot de passe oublié?</a>
+                    </div>
                 </div>
-                <?php unset($_SESSION['error']); ?>
-            <?php endif; ?>
-            <?php if (isset($_SESSION['success'])): ?>
-                <div class="alert alert-success" role="alert">
-                    <?= $_SESSION['success'] ?>
-                </div>
-                <?php unset($_SESSION['success']); ?>
-            <?php endif; ?>
-            <form action="<?= BASE_URL ?>/login" method="POST">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" class="form-control" required value="<?= htmlspecialchars($_SESSION['old_input']['email'] ?? '') ?>">
-                </div>
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
-                    <input type="password" id="password" name="password" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
-            </form>
-            <div class="auth-links">
-                <a href="<?= BASE_URL ?>/forgot-password">Mot de passe oublié?</a>
             </div>
         </div>
         
@@ -78,6 +82,7 @@
     flex-direction: column;
     align-items: center;
     margin-bottom: 2rem;
+    font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
 }
 
 .auth-container h1 {
@@ -152,6 +157,7 @@
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: left;
+    font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
 }
 
 .auth-box h2 {
@@ -168,23 +174,83 @@
     margin-top: 1.5rem;
 }
 
-</style> 
+/* Modale premium Evergem */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(44, 40, 80, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: background 0.2s;
+}
+.modal-content {
+    background: #fff;
+    border-radius: 1.2rem;
+    box-shadow: 0 8px 32px rgba(108, 92, 231, 0.18);
+    padding: 2.2rem 2rem 1.5rem 2rem;
+    min-width: 340px;
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+    animation: modalIn 0.25s cubic-bezier(.4,1.4,.6,1);
+}
+@keyframes modalIn {
+    from { transform: translateY(40px) scale(0.98); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+}
+.modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #6c5ce7;
+    cursor: pointer;
+    transition: color 0.2s;
+    z-index: 10;
+}
+.modal-close:hover {
+    color: #a29bfe;
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const toggleButton = document.getElementById('toggleLoginForm');
-    const loginForm = document.getElementById('classicLoginForm');
+    const openBtn = document.getElementById('openLoginModal');
+    const closeBtn = document.getElementById('closeLoginModal');
+    const modal = document.getElementById('loginModal');
 
-    if (toggleButton && loginForm) {
-        toggleButton.addEventListener('click', function() {
-            if (loginForm.style.display === 'none' || loginForm.style.display === '') {
-                loginForm.style.display = 'block';
-                toggleButton.textContent = 'Login';
-            } else {
-                loginForm.style.display = 'none';
-                toggleButton.textContent = 'Login';
+    if (openBtn && modal) {
+        openBtn.addEventListener('click', function() {
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                const emailInput = modal.querySelector('input[type=email]');
+                if(emailInput) emailInput.focus();
+            }, 100);
+        });
+    }
+    if (closeBtn && modal) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+    // Fermer la modale si on clique en dehors du contenu
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
             }
         });
     }
+    // Fermer avec la touche Echap
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            modal.style.display = 'none';
+        }
+    });
 });
 </script> 

@@ -1,3 +1,5 @@
+<?php require_once APP_PATH . '/Views/layout/header.php'; ?>
+
 <div class="matches-container">
     <div class="page-header">
     <h1>Vos Matchs</h1>

@@ -281,6 +281,19 @@ class PusherNotifications {
             })
             .catch(error => console.error('Erreur lors du chargement des notifications:', error));
     }
+
+    addNotificationEventListeners(element) {
+        // Gestion du clic sur "Marquer comme lu"
+        const markAsReadBtn = element.querySelector('.mark-as-read');
+        if (markAsReadBtn) {
+            markAsReadBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const notificationId = markAsReadBtn.dataset.id;
+                this.markAsRead(notificationId, element);
+            });
+        }
+        // Tu peux ajouter d'autres listeners ici si besoin
+    }
 }
 
 // Initialiser les notifications quand le DOM est chargé

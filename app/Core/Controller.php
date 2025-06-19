@@ -2,7 +2,7 @@
 namespace app\Core;
 
 class Controller {
-    protected function render($view, $data = []) {
+    protected function render($view, $data = [], $layout = 'layout/main.php') {
         // Extraire les données pour les rendre disponibles dans la vue
         extract($data);
 
@@ -20,8 +20,8 @@ class Controller {
         // Récupérer le contenu et nettoyer le tampon
         $content = ob_get_clean();
 
-        // Inclure le layout si existant
-        $layoutPath = APP_PATH . '/Views/layout/main.php';
+        // Inclure le layout passé en paramètre
+        $layoutPath = APP_PATH . '/Views/' . $layout;
         if (file_exists($layoutPath)) {
             include $layoutPath;
         } else {

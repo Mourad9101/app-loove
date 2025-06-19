@@ -1,6 +1,7 @@
 <form method="POST" action="<?= BASE_URL ?>/onboarding" enctype="multipart/form-data" id="photoForm">
     <div class="photo-upload-grid">
-        <?php for ($i = 1; $i <= 6; $i++): ?>
+        <?php for (
+            $i = 1; $i <= 4; $i++): ?>
             <div class="photo-upload-box" data-index="<?= $i ?>">
                 <input type="file" name="photos[]" accept="image/*" id="photo<?= $i ?>" <?= $i <= 2 ? 'required' : '' ?> class="photo-input">
                 <label for="photo<?= $i ?>" class="upload-label">
@@ -98,22 +99,20 @@
 
 button[type="submit"] {
     display: block;
-    margin: 20px auto;
-    padding: 15px 30px;
-    background-color: #4299e1;
+    margin: 20px auto 0 auto;
+    padding: 10px 20px;
+    background-color: #6c5ce7;
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 500;
     transition: all 0.3s ease;
 }
 
-button[type="submit"]:hover {
-    background-color: #3182ce;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+button[type="submit"]:hover:not(:disabled) {
+    background-color: #a29bfe;
 }
 
 .step-description {
@@ -121,6 +120,28 @@ button[type="submit"]:hover {
     color: #4a5568;
     margin: 1rem 0;
     font-size: 0.875rem;
+}
+
+input[type="file"]:focus {
+    border-color: #6c5ce7;
+    box-shadow: 0 0 0 3px #6c5ce766;
+}
+
+body, .onboarding-bg {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.onboarding-card, .photos-card {
+    max-width: 500px;
+    margin: 40px auto 0 auto;
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.10);
+    padding: 2.5rem 2rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 </style>
 

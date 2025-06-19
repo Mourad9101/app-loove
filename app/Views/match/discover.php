@@ -31,6 +31,20 @@ function getGemColor($gemstone) {
 }
 ?>
 
+<style>
+.profile-bio {
+    margin-bottom: 1.5rem;
+    word-break: break-word;
+}
+.profiles-stack {
+    margin-bottom: 5rem !important;
+}
+.match-limit-info {
+    margin-top: 4rem !important;
+    text-align: center;
+}
+</style>
+
 <div class="discover-container">
 
     <?php if (($currentUser['is_premium'] ?? false)): // Afficher les filtres si l'utilisateur est premium ?>
@@ -160,6 +174,7 @@ function getGemColor($gemstone) {
     }
     ?>
 
+    <div style="height: 80px; width: 100%;"></div>
     <div class="match-limit-info">
         <?php if ($isPremium): ?>
             <p>Vous êtes Premium ! Profitez de matchs illimités chaque jour.</p>
@@ -241,11 +256,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 endpoint = 'like';
                 break;
             case 'gem':
-                endpoint = 'gem'; // Endpoint pour le match direct (bouton diamant)
+                endpoint = 'gem';
                 break;
             default:
                 console.log('Action type invalide:', actionType);
-                return; // Arrêter si l'action n'est pas valide
+                return;
         }
         
         console.log('Endpoint:', endpoint);

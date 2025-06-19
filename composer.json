@@ -4,7 +4,8 @@
         "vlucas/phpdotenv": "^5.3",
         "google/apiclient": "^2.18",
         "pusher/pusher-php-server": "^7.2",
-        "pusher/pusher-push-notifications": "^2.0"
+        "pusher/pusher-push-notifications": "^2.0",
+        "phpmailer/phpmailer": "^6.10"
     },
     "autoload": {
         "psr-4": {

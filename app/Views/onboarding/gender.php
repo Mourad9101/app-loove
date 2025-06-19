@@ -27,13 +27,17 @@
     </div>
     
     <button type="submit" style="
-        margin-top: 20px;
+        display: block;
+        margin: 20px auto 0 auto;
         padding: 10px 20px;
-        background-color: #4299e1;
+        background-color: #6c5ce7;
         color: white;
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
     ">Continuer</button>
 </form>
 
@@ -65,13 +69,13 @@
     transition: all 0.3s ease;
 }
 
-.option-card input[type="radio"]:checked + label {
-    border-color: #4299e1;
-    background-color: #ebf8ff;
+.option-card input[type="radio"]:checked + label, .gender-option.selected {
+    border-color: #6c5ce7;
+    background-color: #f3e8ff;
 }
 
 .option-card:hover label {
-    border-color: #4299e1;
+    border-color: #a29bfe;
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -92,6 +96,19 @@
     color: #4a5568;
     font-weight: 500;
     text-align: center;
+}
+
+body, .onboarding-bg {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+button[type="submit"] {
+    background-color: #6c5ce7;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+    background-color: #a29bfe;
 }
 </style>
 

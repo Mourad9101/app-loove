@@ -205,24 +205,20 @@
                     <?php if (isset($_SESSION['is_premium']) && $_SESSION['is_premium']): ?>
                         <a href="<?= BASE_URL ?>/profile/views"><i class="fas fa-eye"></i> Visiteurs</a>
                     <?php endif; ?>
-                    
-                    <div class="notification-area">
-                        <a href="#" id="notification-toggle" class="notification-toggle">
-                            <i class="fas fa-bell"></i>
-                            <span id="unread-notifications-badge" class="badge" style="display: none;">0</span>
-                        </a>
-                        <div id="notification-dropdown" class="notification-dropdown">
-                            <div id="notification-list" class="notification-list">
-                                <!-- Les notifications seront chargées ici via Pusher -->
-                            </div>
-                        </div>
-                    </div>
-
                     <a href="<?= BASE_URL ?>/payment"><i class="fas fa-crown"></i> Premium</a>
                     <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin']): ?>
                         <a href="<?= BASE_URL ?>/admin"><i class="fas fa-shield-alt"></i> Administration</a>
                     <?php endif; ?>
                     <a href="<?= BASE_URL ?>/profile"><i class="fas fa-user"></i> Profil</a>
+                <div class="notification-area">
+                    <a href="#" id="notification-toggle" class="notification-toggle">
+                        <i class="fas fa-bell"></i>
+                        <span id="unread-notifications-badge" class="badge" style="display: none;">0</span>
+                    </a>
+                    <div id="notification-dropdown" class="notification-dropdown">
+                        <div id="notification-list" class="notification-list">
+                        </div>
+                    </div>
                     <a href="<?= BASE_URL ?>/logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
                 <?php else: ?>
                     <a href="<?= BASE_URL ?>/login"><i class="fas fa-sign-in-alt"></i> Connexion</a>

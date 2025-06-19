@@ -46,6 +46,10 @@ try {
     $router->addRoute('GET', BASE_URL . '/register', 'AuthController@registerForm');
     $router->addRoute('POST', BASE_URL . '/register', 'AuthController@register');
     $router->addRoute('GET', BASE_URL . '/logout', 'AuthController@logout');
+    $router->addRoute('GET', BASE_URL . '/forgot-password', 'AuthController@forgotPasswordForm');
+    $router->addRoute('POST', BASE_URL . '/forgot-password', 'AuthController@forgotPassword');
+    $router->addRoute('GET', BASE_URL . '/reset-password', 'AuthController@resetPasswordForm');
+    $router->addRoute('POST', BASE_URL . '/reset-password', 'AuthController@resetPassword');
     
     // Routes de profil
     $router->addRoute('GET', BASE_URL . '/profile', 'ProfileController@index');

@@ -15,20 +15,37 @@
             flex-direction: column;
         }
 
+        .progressbar-container {
+            width: 100%;
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .progressbar-label {
+            font-size: 1rem;
+            color: #6c5ce7;
+            font-weight: bold;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
         .progress-bar {
             width: 100%;
-            height: 4px;
-            background: #eee;
-            margin-bottom: 40px;
-            border-radius: 2px;
+            max-width: 420px;
+            height: 14px;
+            background: #ecebfa;
+            border-radius: 8px;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(108,92,231,0.08);
+            position: relative;
         }
-
         .progress-bar-fill {
             height: 100%;
-            background: linear-gradient(45deg, #FF3366, #FF6B3D);
+            background: linear-gradient(90deg, #6c5ce7 0%, #a29bfe 100%);
             width: <?= ($progress['current'] / $progress['total']) * 100 ?>%;
-            transition: width 0.3s ease;
+            border-radius: 8px 0 0 8px;
+            transition: width 0.5s cubic-bezier(.4,1.4,.6,1);
+            box-shadow: 0 2px 8px #a29bfe33;
         }
 
         .step-title {
@@ -182,12 +199,39 @@
         .option-card.selected svg {
             stroke: #FF3366;
         }
+
+        body, .onboarding-bg {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        button[type="submit"] {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        button[type="submit"]:hover:not(:disabled) {
+            background-color: #a29bfe;
+        }
     </style>
 </head>
 <body>
     <div class="onboarding-container">
-        <div class="progress-bar">
-            <div class="progress-bar-fill"></div>
+        <div class="progressbar-container">
+            <div class="progressbar-label">
+                <?= round(($progress['current'] / $progress['total']) * 100) ?>% complété
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
         </div>
 
         <h1 class="step-title"><?= $title ?></h1>
@@ -195,11 +239,7 @@
             <p class="step-description"><?= $description ?></p>
         <?php endif; ?>
 
-        <form method="POST" class="onboarding-form" enctype="multipart/form-data">
-            <?php include $content_view; ?>
-            
-            <button type="submit" class="next-button">Continuer</button>
-        </form>
+        <?= $content ?>
     </div>
 
     <script>

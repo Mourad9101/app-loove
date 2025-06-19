@@ -43,3 +43,6 @@ define('MAX_FILE_SIZE', 5 * 1024 * 1024); // 5MB
 // Configuration Pusher Beams
 define('PUSHER_NOTIF_INSTANCE_ID', $_ENV['PUSHER_NOTIF_INSTANCE_ID'] ?? '');
 define('PUSHER_NOTIF_PRIMARY_KEY', $_ENV['PUSHER_NOTIF_PRIMARY_KEY'] ?? '');
+
+// New constant
+define('APP_FULL_URL', $_ENV['APP_FULL_URL'] ?? '');

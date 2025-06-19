@@ -135,7 +135,7 @@ class OnboardingController extends Controller {
             'title' => 'Ajoutez vos plus belles photos',
             'progress' => ($this->getCurrentProgress()),
             'description' => 'Ajoutez au moins 2 photos pour continuer'
-        ]);
+        ], 'onboarding/layout.php');
     }
 
     private function gender() {
@@ -153,7 +153,7 @@ class OnboardingController extends Controller {
                 'NB' => 'Non-binaire',
                 'other' => 'Autre'
             ]
-        ]);
+        ], 'onboarding/layout.php');
     }
 
     private function birth_date() {
@@ -165,7 +165,7 @@ class OnboardingController extends Controller {
         $this->render('onboarding/birth_date', [
             'title' => 'Quelle est votre date de naissance ?',
             'progress' => ($this->getCurrentProgress())
-        ]);
+        ], 'onboarding/layout.php');
     }
 
     private function orientation() {
@@ -184,7 +184,7 @@ class OnboardingController extends Controller {
                 'pansexual' => 'Pansexuel(le)',
                 'asexual' => 'Asexuel(le)'
             ]
-        ]);
+        ], 'onboarding/layout.php');
     }
 
     private function looking_for() {
@@ -201,7 +201,7 @@ class OnboardingController extends Controller {
                 'friendship' => 'De l\'amitié',
                 'casual' => 'Des rencontres occasionnelles'
             ]
-        ]);
+        ], 'onboarding/layout.php');
     }
 
     private function interests() {
@@ -225,7 +225,7 @@ class OnboardingController extends Controller {
                 'technology' => 'Technologie',
                 'nature' => 'Nature'
             ]
-        ]);
+        ], 'onboarding/layout.php');
     }
 
     private function bio() {
@@ -238,7 +238,7 @@ class OnboardingController extends Controller {
             'title' => 'Parlez-nous de vous',
             'progress' => ($this->getCurrentProgress()),
             'description' => 'Une courte description qui vous représente'
-        ]);
+        ], 'onboarding/layout.php');
     }
 
     private function location() {
@@ -264,7 +264,7 @@ class OnboardingController extends Controller {
             'title' => 'Où habitez-vous ?',
             'progress' => ($this->getCurrentProgress()),
             'description' => 'Trouvez des personnes près de chez vous'
-        ]);
+        ], 'onboarding/layout.php');
     }
 
     private function getCurrentProgress() {

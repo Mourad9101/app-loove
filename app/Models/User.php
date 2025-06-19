@@ -199,30 +199,36 @@ class User {
         try {
             // Récupérer tous les utilisateurs déjà interagis (likés, passés)
             $excludedUsers = [$userId];
-            
             $likedQuery = "SELECT liked_user_id FROM matches WHERE user_id = :userId";
             $stmt = $this->db->prepare($likedQuery);
             $stmt->execute([':userId' => $userId]);
             $likedUsers = $stmt->fetchAll(PDO::FETCH_COLUMN);
             $excludedUsers = array_merge($excludedUsers, $likedUsers);
-            
             $passedQuery = "SELECT passed_user_id FROM passes WHERE user_id = :userId";
             $stmt = $this->db->prepare($passedQuery);
             $stmt->execute([':userId' => $userId]);
             $passedUsers = $stmt->fetchAll(PDO::FETCH_COLUMN);
             $excludedUsers = array_merge($excludedUsers, $passedUsers);
 
-            // Récupérer les informations de l'utilisateur actuel pour le calcul de distance
+            // Récupérer les informations de l'utilisateur actuel pour le calcul de distance et la pierre
             $currentUser = $this->findById($userId);
             $userLatitude = $currentUser['latitude'] ?? null;
             $userLongitude = $currentUser['longitude'] ?? null;
+            $userGemstone = $currentUser['gemstone'] ?? null;
 
-            $sql = "SELECT id, email, first_name, last_name, gender, age, city, gemstone, image, bio, is_premium, latitude, longitude FROM users WHERE has_completed_onboarding = 1 AND id != :userId";
-            $params = [':userId' => $userId];
-            
-            // Appliquer les filtres
+            $sql = "SELECT id, email, first_name, last_name, gender, age, city, gemstone, image, bio, is_premium, latitude, longitude, ";
+            $sql .= "(6371 * ACOS(COS(RADIANS(:user_latitude)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(:user_longitude)) + SIN(RADIANS(:user_latitude)) * SIN(RADIANS(latitude)))) AS distance, ";
+            $sql .= "CASE WHEN gemstone = :user_gemstone THEN 1 ELSE 0 END AS same_gemstone ";
+            $sql .= "FROM users WHERE has_completed_onboarding = 1 AND id != :userId";
+            $params = [
+                ':userId' => $userId,
+                ':user_latitude' => $userLatitude,
+                ':user_longitude' => $userLongitude,
+                ':user_gemstone' => $userGemstone
+            ];
+
+            // Appliquer les filtres (identique à avant)
             if (!empty($filters)) {
-                // Filtre d'âge
                 if (isset($filters['min_age']) && is_numeric($filters['min_age'])) {
                     $sql .= " AND age >= :min_age";
                     $params[':min_age'] = (int)$filters['min_age'];
@@ -231,51 +237,30 @@ class User {
                     $sql .= " AND age <= :max_age";
                     $params[':max_age'] = (int)$filters['max_age'];
                 }
-
-                // Filtre de genre
                 if (isset($filters['gender']) && in_array($filters['gender'], ['H', 'F', 'NB'])) {
                     $sql .= " AND gender = :gender";
                     $params[':gender'] = $filters['gender'];
                 }
-
-                // Filtre de pierre précieuse
                 if (isset($filters['gemstone']) && !empty($filters['gemstone'])) {
                     $sql .= " AND gemstone = :gemstone";
                     $params[':gemstone'] = $filters['gemstone'];
                 }
-
-                // Filtre de rayon de recherche (nécessite latitude et longitude)
                 if (isset($filters['radius']) && is_numeric($filters['radius']) && $userLatitude !== null && $userLongitude !== null) {
-                    $radius = (float)$filters['radius']; // Rayon en km
-                    $earthRadius = 6371; // Rayon de la Terre en km
-
-                    $sql .= " AND ("
-                         . $earthRadius . " * ACOS("
-                         . "COS(RADIANS(:user_latitude)) * COS(RADIANS(latitude)) * "
-                         . "COS(RADIANS(longitude) - RADIANS(:user_longitude)) + "
-                         . "SIN(RADIANS(:user_latitude)) * SIN(RADIANS(latitude))"
-                         . ")) <= :radius";
-                    
-                    $params[':user_latitude'] = $userLatitude;
-                    $params[':user_longitude'] = $userLongitude;
-                    $params[':radius'] = $radius;
+                    $sql .= " AND (6371 * ACOS(COS(RADIANS(:user_latitude)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(:user_longitude)) + SIN(RADIANS(:user_latitude)) * SIN(RADIANS(latitude)))) <= :radius";
+                    $params[':radius'] = (float)$filters['radius'];
                 }
             }
-            
-            // Ajouter la condition pour exclure les utilisateurs déjà interagis
+            /*
             if (!empty($excludedUsers)) {
                 $placeholders = str_repeat('?,', count($excludedUsers) - 1) . '?';
                 $sql .= " AND id NOT IN ($placeholders)";
                 $params = array_merge($params, $excludedUsers);
             }
-            
-            $sql .= " ORDER BY RAND() LIMIT :limit OFFSET :offset";
-            
+            */
+            $sql .= " ORDER BY distance ASC, same_gemstone DESC LIMIT :limit OFFSET :offset";
             $stmt = $this->db->prepare($sql);
-
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-
             foreach ($params as $key => &$val) {
                 if (is_int($val)) {
                     $stmt->bindValue($key, $val, PDO::PARAM_INT);
@@ -283,15 +268,11 @@ class User {
                     $stmt->bindValue($key, $val);
                 }
             }
-
             $stmt->execute();
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            // Retirer les mots de passe des résultats
             foreach ($results as &$result) {
                 unset($result['password']);
             }
-            
             return $results;
         } catch (\PDOException $e) {
             error_log("Erreur dans getPotentialMatches : " . $e->getMessage());
@@ -537,5 +518,35 @@ class User {
             ':is_premium' => $isPremium ? 1 : 0,
             ':id' => $userId
         ]);
+    }
+
+    public function updateResetToken($userId, $token, $expiry) {
+        $sql = "UPDATE users SET reset_token = :token, reset_token_expiry = :expiry WHERE id = :id";
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':token' => $token,
+                ':expiry' => $expiry,
+                ':id' => $userId
+            ]);
+        } catch (\PDOException $e) {
+            error_log("Erreur updateResetToken : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function updatePasswordAndClearToken($userId, $password) {
+        $sql = "UPDATE users SET password = :password, reset_token = NULL, reset_token_expiry = NULL WHERE id = :id";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $hashed = password_hash($password, PASSWORD_DEFAULT);
+            return $stmt->execute([
+                ':password' => $hashed,
+                ':id' => $userId
+            ]);
+        } catch (\PDOException $e) {
+            error_log("Erreur updatePasswordAndClearToken : " . $e->getMessage());
+            return false;
+        }
     }
 } 

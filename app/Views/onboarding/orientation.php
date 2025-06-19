@@ -32,7 +32,7 @@
     <button type="submit" style="
         margin-top: 20px;
         padding: 10px 20px;
-        background-color: #4299e1;
+        background-color: #6c5ce7;
         color: white;
         border: none;
         border-radius: 5px;
@@ -69,13 +69,13 @@
     transition: all 0.3s ease;
 }
 
-.option-card input[type="radio"]:checked + label {
-    border-color: #4299e1;
-    background-color: #ebf8ff;
+.option-card input[type="radio"]:checked + label, .orientation-option.selected {
+    border-color: #6c5ce7;
+    background-color: #f3e8ff;
 }
 
 .option-card:hover label {
-    border-color: #4299e1;
+    border-color: #a29bfe;
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -98,23 +98,38 @@
     text-align: center;
 }
 
+body, .onboarding-bg {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.onboarding-card, .orientation-card {
+    max-width: 500px;
+    margin: 40px auto 0 auto;
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.10);
+    padding: 2.5rem 2rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 button[type="submit"] {
     display: block;
-    margin: 20px auto;
-    padding: 15px 30px;
-    background-color: #4299e1;
+    margin: 20px auto 0 auto;
+    padding: 10px 20px;
+    background-color: #6c5ce7;
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 500;
     transition: all 0.3s ease;
 }
 
-button[type="submit"]:hover {
-    background-color: #3182ce;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+button[type="submit"]:hover:not(:disabled) {
+    background-color: #a29bfe;
 }
 </style> 

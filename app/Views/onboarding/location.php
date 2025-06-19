@@ -65,4 +65,41 @@
             document.querySelector('.next-button')
         );
     }
-</script> 
+</script>
+
+<style>
+    body, .onboarding-bg {
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    .onboarding-card, .location-card {
+        max-width: 500px;
+        margin: 40px auto 0 auto;
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 16px rgba(108, 92, 231, 0.10);
+        padding: 2.5rem 2rem 2rem 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    input[type="text"]:focus, input[type="number"]:focus {
+        border-color: #6c5ce7;
+        box-shadow: 0 0 0 3px #6c5ce766;
+    }
+    button[type="submit"] {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #6c5ce7;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    button[type="submit"]:hover:not(:disabled) {
+        background-color: #a29bfe;
+    }
+</style> 
