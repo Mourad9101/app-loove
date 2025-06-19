@@ -13,11 +13,6 @@ define('STRIPE_SECRET_KEY', $_ENV['STRIPE_SECRET_KEY'] ?? '');
 define('STRIPE_PUBLIC_KEY', $_ENV['STRIPE_PUBLIC_KEY'] ?? '');
 define('STRIPE_WEBHOOK_SECRET', $_ENV['STRIPE_WEBHOOK_SECRET'] ?? '');
 
-// Configuration Google OAuth
-define('GOOGLE_CLIENT_ID', '295650966256-6f1drn88jrhbgb3b5uctuhsehg1imiui.apps.googleusercontent.com');
-define('GOOGLE_CLIENT_SECRET', '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');
-define('GOOGLE_REDIRECT_URI', BASE_URL . '/google/callback');
-
 // Configuration de la base de données
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'evergem');
