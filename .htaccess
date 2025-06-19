@@ -1,18 +1,35 @@
-# Activation du module rewrite si disponible
+# Activation du module rewrite
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /Evergem3/
 
+    # Empêcher l'accès direct au dossier vendor
+    RewriteRule ^vendor/.*$ - [F]
+
+    # Permettre l'accès direct au service worker
+    <FilesMatch "service-worker\.js$">
+        RewriteEngine Off
+    </FilesMatch>
+
     # Rediriger les requêtes vers des fichiers/dossiers existants
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-
-    # Rediriger toutes les autres requêtes vers index.php
-    RewriteRule ^(.*)$ index.php [QSA,L]
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 </IfModule>
 
-# Permettre l'accès aux dossiers statiques
+# Permettre l'accès aux fichiers statiques
 <FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico)$">
     Order Allow,Deny
     Allow from all
+</FilesMatch>
+
+# Bloquer l'accès aux fichiers sensibles
+<FilesMatch "^\.env$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "^\.ht">
+    Order allow,deny
+    Deny from all
 </FilesMatch> 

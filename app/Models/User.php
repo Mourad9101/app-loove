@@ -23,6 +23,7 @@ class User {
                     gemstone,
                     image,
                     bio,
+                    google_id,
                     created_at,
                     updated_at
                 ) VALUES (
@@ -36,21 +37,19 @@ class User {
                     :gemstone,
                     :image,
                     :bio,
+                    :google_id,
                     NOW(),
                     NOW()
                 )";
         
         try {
-            // Log des données reçues
-            error_log("Tentative d'inscription - Données reçues : " . print_r($data, true));
-            
             // Vérifie si le mot de passe est déjà haché
-            $password = (substr($data['password'], 0, 4) === '$2y$') 
-                ? $data['password']  // Si déjà haché, utiliser tel quel
-                : password_hash($data['password'], PASSWORD_DEFAULT);  // Sinon, le hacher
+            $password = (isset($data['password']) && substr($data['password'], 0, 4) === '$2y$') 
+                ? $data['password']
+                : (isset($data['password']) ? password_hash($data['password'], PASSWORD_DEFAULT) : null);
             
             // Séparer le nom complet en prénom et nom
-            $nameParts = explode(' ', trim($data['name']), 2);
+            $nameParts = explode(' ', trim($data['name'] ?? ''), 2);
             $firstName = $nameParts[0];
             $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
             
@@ -65,16 +64,14 @@ class User {
                 ':city' => isset($data['city']) ? $data['city'] : 'Paris',
                 ':gemstone' => isset($data['gemstone']) ? $data['gemstone'] : 'Diamond',
                 ':image' => isset($data['image']) ? $data['image'] : 'default.jpg',
-                ':bio' => isset($data['bio']) ? $data['bio'] : 'Nouvelle personne sur EverGem'
+                ':bio' => isset($data['bio']) ? $data['bio'] : 'Nouvelle personne sur EverGem',
+                ':google_id' => isset($data['google_id']) ? $data['google_id'] : null
             ];
-            
-            // Log des paramètres de la requête
-            error_log("Paramètres de la requête : " . print_r($params, true));
             
             $success = $stmt->execute($params);
             
             if (!$success) {
-                error_log("Erreur lors de l'exécution de la requête : " . print_r($stmt->errorInfo(), true));
+                error_log("Erreur d'exécution de la requête CREATE USER: " . implode(" | ", $stmt->errorInfo()));
                 return false;
             }
             
@@ -149,6 +146,7 @@ class User {
             'gemstone',
             'bio',
             'image',
+            'additional_images',
             'latitude',
             'longitude'
         ];
@@ -156,20 +154,15 @@ class User {
         $fields = [];
         $params = [':id' => $id];
 
-        // Log des données reçues
-        error_log("Tentative de mise à jour - Données reçues : " . print_r($data, true));
-
         foreach ($data as $key => $value) {
             if (in_array($key, $allowedFields)) {
                 // Validation spécifique pour le genre
                 if ($key === 'gender' && !in_array($value, ['H', 'F', 'NB'])) {
-                    error_log("Valeur de genre invalide : " . $value);
                     continue;
                 }
                 
                 // Validation spécifique pour la pierre précieuse
                 if ($key === 'gemstone' && !in_array($value, ['Diamond', 'Ruby', 'Emerald', 'Sapphire', 'Amethyst'])) {
-                    error_log("Valeur de pierre précieuse invalide : " . $value);
                     continue;
                 }
 
@@ -182,16 +175,12 @@ class User {
         $fields[] = "updated_at = NOW()";
 
         if (empty($fields)) {
-            error_log("Aucun champ valide à mettre à jour");
             return false;
         }
 
         $sql = "UPDATE users SET " . implode(', ', $fields) . " WHERE id = :id";
 
         try {
-            error_log("SQL: " . $sql);
-            error_log("Params: " . print_r($params, true));
-            
             $stmt = $this->db->prepare($sql);
             $result = $stmt->execute($params);
             
@@ -206,58 +195,123 @@ class User {
         }
     }
 
-    public function getPotentialMatches(int $userId): array {
+    public function getPotentialMatches(int $userId, int $offset = 0, int $limit = 10, array $filters = []): array {
         try {
-            error_log("=== DÉBUT getPotentialMatches pour l'utilisateur $userId ===");
-            
-            // Récupérer tous les utilisateurs déjà interagis (likés)
+            // Récupérer tous les utilisateurs déjà interagis (likés, passés)
             $excludedUsers = [$userId];
             
-            // Vérifier si la table matches existe
-            $checkTable = "SHOW TABLES LIKE 'matches'";
-            $stmt = $this->db->prepare($checkTable);
-            $stmt->execute();
-            $tableExists = $stmt->rowCount() > 0;
+            $likedQuery = "SELECT liked_user_id FROM matches WHERE user_id = :userId";
+            $stmt = $this->db->prepare($likedQuery);
+            $stmt->execute([':userId' => $userId]);
+            $likedUsers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $excludedUsers = array_merge($excludedUsers, $likedUsers);
             
-            if ($tableExists) {
-                // Récupérer les utilisateurs likés
-                $likedQuery = "SELECT liked_user_id FROM matches WHERE user_id = :userId";
-                $stmt = $this->db->prepare($likedQuery);
-                $stmt->execute([':userId' => $userId]);
-                $likedUsers = $stmt->fetchAll(PDO::FETCH_COLUMN);
-                $excludedUsers = array_merge($excludedUsers, $likedUsers);
-            }
+            $passedQuery = "SELECT passed_user_id FROM passes WHERE user_id = :userId";
+            $stmt = $this->db->prepare($passedQuery);
+            $stmt->execute([':userId' => $userId]);
+            $passedUsers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $excludedUsers = array_merge($excludedUsers, $passedUsers);
 
-            // Construire la requête principale
-            $sql = "SELECT * FROM users WHERE has_completed_onboarding = 1";
+            // Récupérer les informations de l'utilisateur actuel pour le calcul de distance
+            $currentUser = $this->findById($userId);
+            $userLatitude = $currentUser['latitude'] ?? null;
+            $userLongitude = $currentUser['longitude'] ?? null;
+
+            $sql = "SELECT id, email, first_name, last_name, gender, age, city, gemstone, image, bio, is_premium, latitude, longitude FROM users WHERE has_completed_onboarding = 1 AND id != :userId";
+            $params = [':userId' => $userId];
+            
+            // Appliquer les filtres
+            if (!empty($filters)) {
+                // Filtre d'âge
+                if (isset($filters['min_age']) && is_numeric($filters['min_age'])) {
+                    $sql .= " AND age >= :min_age";
+                    $params[':min_age'] = (int)$filters['min_age'];
+                }
+                if (isset($filters['max_age']) && is_numeric($filters['max_age'])) {
+                    $sql .= " AND age <= :max_age";
+                    $params[':max_age'] = (int)$filters['max_age'];
+                }
+
+                // Filtre de genre
+                if (isset($filters['gender']) && in_array($filters['gender'], ['H', 'F', 'NB'])) {
+                    $sql .= " AND gender = :gender";
+                    $params[':gender'] = $filters['gender'];
+                }
+
+                // Filtre de pierre précieuse
+                if (isset($filters['gemstone']) && !empty($filters['gemstone'])) {
+                    $sql .= " AND gemstone = :gemstone";
+                    $params[':gemstone'] = $filters['gemstone'];
+                }
+
+                // Filtre de rayon de recherche (nécessite latitude et longitude)
+                if (isset($filters['radius']) && is_numeric($filters['radius']) && $userLatitude !== null && $userLongitude !== null) {
+                    $radius = (float)$filters['radius']; // Rayon en km
+                    $earthRadius = 6371; // Rayon de la Terre en km
+
+                    $sql .= " AND ("
+                         . $earthRadius . " * ACOS("
+                         . "COS(RADIANS(:user_latitude)) * COS(RADIANS(latitude)) * "
+                         . "COS(RADIANS(longitude) - RADIANS(:user_longitude)) + "
+                         . "SIN(RADIANS(:user_latitude)) * SIN(RADIANS(latitude))"
+                         . ")) <= :radius";
+                    
+                    $params[':user_latitude'] = $userLatitude;
+                    $params[':user_longitude'] = $userLongitude;
+                    $params[':radius'] = $radius;
+                }
+            }
             
             // Ajouter la condition pour exclure les utilisateurs déjà interagis
             if (!empty($excludedUsers)) {
                 $placeholders = str_repeat('?,', count($excludedUsers) - 1) . '?';
                 $sql .= " AND id NOT IN ($placeholders)";
+                $params = array_merge($params, $excludedUsers);
             }
             
-            // Ajouter des conditions de filtrage supplémentaires (âge, localisation, etc.)
-            $sql .= " ORDER BY RAND() LIMIT 10";
-            
-            error_log("Requête SQL : " . $sql);
-            error_log("Paramètres : " . print_r($excludedUsers, true));
+            $sql .= " ORDER BY RAND() LIMIT :limit OFFSET :offset";
             
             $stmt = $this->db->prepare($sql);
-            $stmt->execute($excludedUsers);
+
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+            foreach ($params as $key => &$val) {
+                if (is_int($val)) {
+                    $stmt->bindValue($key, $val, PDO::PARAM_INT);
+                } else {
+                    $stmt->bindValue($key, $val);
+                }
+            }
+
+            $stmt->execute();
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            error_log("Nombre de résultats trouvés : " . count($results));
             
             // Retirer les mots de passe des résultats
             foreach ($results as &$result) {
                 unset($result['password']);
             }
             
-            error_log("=== FIN getPotentialMatches ===");
             return $results;
         } catch (\PDOException $e) {
             error_log("Erreur dans getPotentialMatches : " . $e->getMessage());
+            error_log("Trace : " . $e->getTraceAsString());
+            return [];
+        }
+    }
+
+    public function getAllUsers(): array
+    {
+        $sql = "SELECT id, email, first_name, last_name, gender, age, city, is_active, is_premium, is_admin, image, created_at, updated_at FROM users";
+        try {
+            error_log("Exécution de getAllUsers() - SQL: " . $sql);
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            error_log("getAllUsers() - Nombre d'utilisateurs trouvés: " . count($results));
+            return $results;
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la récupération de tous les utilisateurs : " . $e->getMessage());
             error_log("Trace : " . $e->getTraceAsString());
             return [];
         }
@@ -328,33 +382,160 @@ class User {
             }
         }
 
+        // Gestion des images
+        if (isset($data['image'])) {
+            $fields[] = "image = :image";
+            $params[':image'] = $data['image'];
+        }
+
+        if (isset($data['additional_images']) && is_array($data['additional_images'])) {
+            $fields[] = "additional_images = :additional_images";
+            $params[':additional_images'] = json_encode($data['additional_images']);
+        }
+
         // Marquer explicitement l'onboarding comme complété
         $fields[] = "has_completed_onboarding = 1";
         
         if (empty($fields)) {
-            error_log("Aucun champ à mettre à jour dans updateOnboardingStep");
             return false;
         }
 
         $sql = "UPDATE users SET " . implode(', ', $fields) . " WHERE id = :id";
 
         try {
-            error_log("SQL updateOnboardingStep: " . $sql);
-            error_log("Params updateOnboardingStep: " . print_r($params, true));
-            
             $stmt = $this->db->prepare($sql);
             $result = $stmt->execute($params);
             
             if (!$result) {
-                error_log("Erreur lors de l'exécution de la requête updateOnboardingStep: " . print_r($stmt->errorInfo(), true));
-            } else {
-                error_log("Mise à jour réussie - has_completed_onboarding défini à 1 pour l'utilisateur " . $userId);
+                error_log("Erreur lors de l'exécution de la requête: " . print_r($stmt->errorInfo(), true));
             }
             
             return $result;
         } catch (\PDOException $e) {
-            error_log("Exception dans updateOnboardingStep: " . $e->getMessage());
+            error_log("Exception dans update: " . $e->getMessage());
             return false;
         }
+    }
+
+    public function updateDailyMatchCount(int $userId, int $count, string $date): bool
+    {
+        $sql = "UPDATE users SET daily_matches_count = :count, last_match_date = :date WHERE id = :userId";
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':count' => $count,
+                ':date' => $date,
+                ':userId' => $userId
+            ]);
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la mise à jour du compteur de matchs quotidiens : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function createPass(int $userId, int $passedUserId): bool
+    {
+        $sql = "INSERT INTO passes (user_id, passed_user_id, created_at) VALUES (:user_id, :passed_user_id, NOW())";
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':user_id' => $userId,
+                ':passed_user_id' => $passedUserId
+            ]);
+        } catch (\PDOException $e) {
+            // Si c'est une erreur de clé dupliquée, on considère que c'est un succès
+            if ($e->getCode() == 23000) {
+                return true;
+            }
+            error_log("Erreur lors de la création du pass : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function setUserStatus(int $userId, bool $isActive): bool
+    {
+        $sql = "UPDATE users SET is_active = :is_active WHERE id = :userId";
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':is_active' => $isActive ? 1 : 0,
+                ':userId' => $userId
+            ]);
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la mise à jour du statut de l'utilisateur : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteUser(int $userId): bool
+    {
+        $sql = "DELETE FROM users WHERE id = :userId";
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([':userId' => $userId]);
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la suppression de l'utilisateur : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function setIsAdmin(int $userId, bool $isAdmin): bool
+    {
+        $sql = "UPDATE users SET is_admin = :is_admin WHERE id = :userId";
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':is_admin' => $isAdmin ? 1 : 0,
+                ':userId' => $userId
+            ]);
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la mise à jour du statut d'administrateur : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function recordProfileView(int $viewerId, int $viewedId): bool
+    {
+        $sql = "INSERT INTO profile_views (viewer_id, viewed_id) VALUES (:viewer_id, :viewed_id)";
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':viewer_id' => $viewerId,
+                ':viewed_id' => $viewedId
+            ]);
+        } catch (\PDOException $e) {
+            // Si c'est une erreur de clé dupliquée (même vue le même jour), on ne fait rien.
+            if ($e->getCode() == 23000) {
+                return true;
+            }
+            error_log("Erreur lors de l'enregistrement de la vue de profil : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getProfileViews(int $viewedId): array
+    {
+        $sql = "SELECT pv.viewer_id, u.first_name, u.last_name, u.image, pv.view_date 
+                FROM profile_views pv 
+                JOIN users u ON pv.viewer_id = u.id 
+                WHERE pv.viewed_id = :viewed_id 
+                ORDER BY pv.view_date DESC";
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':viewed_id' => $viewedId]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la récupération des vues de profil : " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function setIsPremium($userId, $isPremium) {
+        $sql = "UPDATE users SET is_premium = :is_premium, updated_at = NOW() WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':is_premium' => $isPremium ? 1 : 0,
+            ':id' => $userId
+        ]);
     }
 } 

@@ -22,46 +22,90 @@
             --text-color: #2d3436;
             --border-radius: 8px;
         }
+
+        .notification-area {
+            position: relative;
+            display: inline-block;
+            margin-left: 15px;
+        }
+        .notification-toggle {
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+        }
+        .notification-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 250px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1000;
+            right: 0;
+            border-radius: 5px;
+            overflow: hidden;
+            max-height: 400px;
+            overflow-y: auto;
+            top: 100%;
+        }
+        .notification-dropdown-content.show {
+            display: block !important;
+        }
+        .notification-header {
+            background-color: #eee;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .notification-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .notification-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .notification-list li:last-child {
+            border-bottom: none;
+        }
+        .notification-list li:hover {
+            background-color: #f1f1f1;
+        }
+        .notification-list li.unread {
+            background-color: #e6f7ff;
+            font-weight: bold;
+        }
+        .notification-list li img.notification-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .notification-footer {
+            border-top: 1px solid #ddd;
+            text-align: center;
+        }
+        .notification-footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .navbar-nav .notification-area .nav-link {
+            padding: 0.5rem 1rem;
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="<?= BASE_URL ?>/">
-                <?= APP_NAME ?>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <?php if (!isset($_SESSION['user_id'])): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= BASE_URL ?>/login">Connexion</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= BASE_URL ?>/register">Inscription</a>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= BASE_URL ?>/matches">Matchs</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= BASE_URL ?>/messages">Messages</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= BASE_URL ?>/profile">Profil</a>
-                        </li>
-                    <?php endif; ?>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
     <!-- Contenu principal -->
     <main class="main-content">
-        <?= $content ?>
+        <?= isset($content) ? $content : '' ?>
     </main>
 
     <!-- Footer -->
@@ -73,6 +117,18 @@
 
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= BASE_URL ?>/js/main.js"></script>
+    
+    <!-- Pusher Beams -->
+    <script src="https://js.pusher.com/beams/2.1.0/push-notifications-cdn.js"></script>
+    <script>
+        const beamsClient = new PusherPushNotifications.Client({
+            instanceId: '<?= PUSHER_NOTIF_INSTANCE_ID ?>',
+        });
+
+        beamsClient.start()
+            .then(() => beamsClient.addDeviceInterest('hello'))
+            .then(() => console.log('Successfully registered and subscribed!'))
+            .catch(console.error);
+    </script>
 </body>
 </html> 

@@ -4,8 +4,19 @@ define('DEBUG', true);
 
 // Configuration de l'application
 define('APP_NAME', 'EverGem');
-define('APP_URL', '/Evergem3');
-define('BASE_URL', '/Evergem3');
+define('APP_URL', '/Evergem3'); // Pour les chemins internes de l'application
+define('BASE_URL', '/Evergem3'); // URL de base pour les chemins relatifs
+define('NGROK_URL', 'https://d9a4-2a01-e0a-348-7e0-91d7-fda3-15ec-d9e5.ngrok-free.app/Evergem3');
+
+// Configuration Stripe (chargée depuis .env)
+define('STRIPE_SECRET_KEY', $_ENV['STRIPE_SECRET_KEY'] ?? '');
+define('STRIPE_PUBLIC_KEY', $_ENV['STRIPE_PUBLIC_KEY'] ?? '');
+define('STRIPE_WEBHOOK_SECRET', $_ENV['STRIPE_WEBHOOK_SECRET'] ?? '');
+
+// Configuration Google OAuth
+define('GOOGLE_CLIENT_ID', '295650966256-6f1drn88jrhbgb3b5uctuhsehg1imiui.apps.googleusercontent.com');
+define('GOOGLE_CLIENT_SECRET', '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');
+define('GOOGLE_REDIRECT_URI', BASE_URL . '/google/callback');
 
 // Configuration de la base de données
 define('DB_HOST', 'localhost');
@@ -32,4 +43,8 @@ if (DEBUG) {
 }
 
 // Constantes de l'application
-define('MAX_FILE_SIZE', 5 * 1024 * 1024); // 5MB 
+define('MAX_FILE_SIZE', 5 * 1024 * 1024); // 5MB
+
+// Configuration Pusher Beams
+define('PUSHER_NOTIF_INSTANCE_ID', $_ENV['PUSHER_NOTIF_INSTANCE_ID'] ?? '');
+define('PUSHER_NOTIF_PRIMARY_KEY', $_ENV['PUSHER_NOTIF_PRIMARY_KEY'] ?? '');

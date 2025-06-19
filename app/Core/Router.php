@@ -20,14 +20,16 @@ class Router {
         $requestMethod = $_SERVER['REQUEST_METHOD'];
         $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
+        error_log("DEBUG Router: Requête pour URI originale: " . $requestUri . " avec méthode: " . $requestMethod);
+
         foreach ($this->routes as $route) {
+            error_log("DEBUG Router: Tentative de correspondance avec la route: " . $route['method'] . " " . $route['path']);
             $params = [];
             if ($route['method'] === $requestMethod && $this->matchPath($route['path'], $requestUri, $params)) {
+                error_log("DEBUG Router: Route correspondante trouvée: " . $route['path']);
                 return $this->executeHandler($route['handler'], $params);
             }
         }
-
-        // Si aucune route ne correspond
         $this->notFound();
     }
 
@@ -36,8 +38,11 @@ class Router {
         $routePath = trim($routePath, '/');
         $requestUri = trim($requestUri, '/');
 
+        error_log("DEBUG Router Match: Route Path: " . $routePath . ", Request URI: " . $requestUri);
+
         // Si les chemins sont identiques, pas besoin de vérifier les paramètres
         if ($routePath === $requestUri) {
+            error_log("DEBUG Router Match: Correspondance exacte trouvée.");
             return true;
         }
 
@@ -80,6 +85,9 @@ class Router {
         }
 
         $controller = new $controllerClass();
+
+        error_log("DEBUG Router: Attempting to call method '{$method}' on controller '{$controllerClass}'");
+
         if (!method_exists($controller, $method)) {
             throw new \Exception("Method {$method} not found in controller {$controllerClass}");
         }

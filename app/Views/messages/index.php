@@ -1,51 +1,55 @@
 <?php require_once APP_PATH . '/Views/layout/header.php'; ?>
 
 <div class="container mt-5">
-    <h1 class="mb-4">Messages</h1>
-    <div class="row">
-         <div class="col-md-4">
-             <div class="card">
-                 <div class="card-header">
-                     Conversations
-                 </div>
-                 <div class="card-body" id="conversations-list">
-                     <!-- La liste des conversations sera chargée ici (par exemple, via une boucle sur $conversations) -->
-                     <?php if (isset($conversations) && !empty($conversations)) : ?>
-                         <?php foreach ($conversations as $conv) : ?>
-                             <div class="conversation-item mb-2 p-2 border rounded" data-conv-id="<?= htmlspecialchars($conv['id']) ?>">
-                                 <h5><?= htmlspecialchars($conv['recipient_name']) ?></h5>
-                                 <small class="text-muted"><?= htmlspecialchars($conv['last_message'] ?? 'Aucun message') ?></small>
-                             </div>
-                         <?php endforeach; ?>
-                     <?php else : ?>
-                         <p class="text-muted">Aucune conversation.</p>
-                     <?php endif; ?>
-                 </div>
-             </div>
-         </div>
-         <div class="col-md-8">
-             <div class="card">
-                 <div class="card-header" id="chat-header">
-                     <!-- Le nom du destinataire (ou un titre par défaut) sera affiché ici -->
-                     Conversation
-                 </div>
-                 <div class="card-body" id="chat-messages" style="height: 400px; overflow-y: auto;">
-                     <!-- Les messages de la conversation sélectionnée seront chargés ici -->
-                     <p class="text-muted">Sélectionnez une conversation pour voir les messages.</p>
-                 </div>
-                 <div class="card-footer">
-                     <form id="send-message-form" class="d-flex" style="display: none;">
-                         <input type="text" class="form-control me-2" id="message-input" placeholder="Écrivez votre message..." />
-                         <button type="submit" class="btn btn-primary">Envoyer</button>
-                     </form>
-                 </div>
-             </div>
-         </div>
+    <h1>Vos Conversations</h1>
+    <div class="list-group">
+        <?php if (!empty($matches)): ?>
+            <?php foreach ($matches as $match): ?>
+                <a href="<?= BASE_URL ?>/messages/<?= htmlspecialchars($match['id']) ?>" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <?php if (isset($match['image']) && !empty($match['image'])): ?>
+                                <img src="<?= BASE_URL ?>/public/uploads/<?= htmlspecialchars($match['image']) ?>" alt="Profil" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                            <?php else: ?>
+                                <img src="<?= BASE_URL ?>/public/images/Logo Evergem.png" alt="Profil" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                            <?php endif; ?>
+                            <div>
+                                <h5 class="mb-1">
+                                    <?= htmlspecialchars($match['first_name']) ?>
+                                    <?php if (isset($match['is_read']) && $match['is_read'] == 0 && isset($currentUser['id']) && $match['id'] != $currentUser['id']): ?>
+                                        <span class="badge bg-primary rounded-pill ms-2">Nouveau</span>
+                                    <?php endif; ?>
+                                </h5>
+                                <?php if (isset($match['last_message_content'])): ?>
+                                    <p class="mb-1 text-muted"><?= htmlspecialchars($match['last_message_content']) ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            <?= isset($match['last_message_date']) ? htmlspecialchars(date('d/m/Y H:i', strtotime($match['last_message_date']))) : (isset($match['created_at']) ? htmlspecialchars(date('d/m/Y H:i', strtotime($match['created_at']))) : 'Aucune') ?>
+                        </small>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="list-group-item">
+                <p class="mb-0">Vous n'avez pas encore de conversations.</p>
+                <a href="<?= BASE_URL ?>/discover" class="btn btn-primary mt-3">Découvrir des profils</a>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
 <style>
- .conversation-item:hover { background-color: #f8f9fa; cursor: pointer; }
-</style>
+.list-group-item {
+    transition: background-color 0.2s ease;
+}
 
-<?php require_once APP_PATH . '/Views/layout/footer.php'; ?> 
+.list-group-item:hover {
+    background-color: rgba(108, 92, 231, 0.05);
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+</style>

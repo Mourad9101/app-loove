@@ -19,14 +19,14 @@
             <?php foreach ($matches as $match): ?>
                 <div class="match-card" data-user-id="<?= $match['id'] ?>">
                     <div class="match-image">
-                        <?php if (!$match['has_messaged']): ?>
+                        <?php if (!empty($match['last_message_content'])): ?>
                             <div class="new-match-badge">
                                 <i class="fas fa-star"></i> Nouveau match
                             </div>
                         <?php endif; ?>
-                        <img src="<?= APP_URL ?>/uploads/<?= htmlspecialchars($match['image']) ?>" 
+                        <img src="<?= APP_URL ?>/public/uploads/<?= htmlspecialchars($match['image']) ?>" 
                              alt="Photo de <?= htmlspecialchars($match['first_name']) ?>"
-                             class="profile-image">
+                             class="match-image-img">
                         <div class="match-image-overlay"></div>
                     </div>
                     
@@ -57,130 +57,6 @@
         </div>
     <?php endif; ?>
 </div>
-
-<style>
-/* Styles spécifiques à la page des matchs */
-.matches-container {
-    background-color: transparent;
-}
-
-.page-header h1 {
-    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
-}
-
-.page-header p {
-    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
-}
-
-.matches-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2rem;
-}
-
-.match-card {
-    position: relative;
-    border: none;
-    background: var(--card-background);
-    transition: all 0.3s ease;
-}
-
-.match-image {
-    position: relative;
-    padding-top: 100%;
-    overflow: hidden;
-}
-
-.match-image img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.match-image-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1));
-    pointer-events: none;
-}
-
-.match-card:hover .match-image img {
-    transform: scale(1.05);
-}
-
-.new-match-badge {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: var(--primary-color);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
-    font-size: 0.8rem;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
-}
-
-.no-matches {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 400px;
-    background: var(--card-background);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-}
-
-.no-matches-content {
-    text-align: center;
-    padding: 2rem;
-}
-
-.no-matches-content i {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-}
-
-.no-matches-content p {
-    font-size: 1.1rem;
-    color: var(--text-muted);
-    margin-bottom: 1.5rem;
-    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
-}
-
-.match-info h3 {
-    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
-}
-
-.match-info p {
-    font-family: 'Poppins', sans-serif; /* Assure la police Poppins */
-}
-
-@media (max-width: 768px) {
-    .matches-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1rem;
-        padding: 0 1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .matches-grid {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -225,3 +101,151 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script> 
+
+<style>
+body {
+    background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
+}
+.matches-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 24px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(127,90,240,0.08);
+}
+.page-header h1 {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #22223b;
+}
+.page-header p {
+    color: #7f5af0;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+.matches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 2rem;
+}
+.match-card {
+    background: #f4f4fb;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(127,90,240,0.07);
+    overflow: hidden;
+    transition: transform 0.18s, box-shadow 0.18s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 1rem;
+    position: relative;
+}
+.match-card:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 8px 32px rgba(127,90,240,0.13);
+}
+.match-image {
+    position: relative;
+    margin-bottom: 1rem;
+}
+.match-image-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #7f5af0;
+    display: block;
+}
+.new-match-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #7f5af0;
+    color: #fff;
+    font-size: 0.85rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    box-shadow: 0 2px 8px rgba(127,90,240,0.13);
+}
+.match-info h3 {
+    font-size: 1.3rem;
+    margin: 0 0 0.3rem 0;
+    color: #22223b;
+    text-align: center;
+}
+.match-details {
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    text-align: center;
+}
+.match-gemstone {
+    font-size: 1.1rem;
+    color: #7f5af0;
+    margin-bottom: 0.3rem;
+    text-align: center;
+}
+.match-date {
+    font-size: 0.95rem;
+    color: #888;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+.match-actions {
+    display: flex;
+    gap: 0.7rem;
+    margin-top: 0.5rem;
+    justify-content: center;
+}
+.btn.btn-primary {
+    background: #7f5af0;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.18s;
+}
+.btn.btn-primary:hover {
+    background: #6246ea;
+}
+.btn.btn-unmatch {
+    background: #fff;
+    color: #e63946;
+    border: 1px solid #e63946;
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    display: flex;
+    align-items: center;
+}
+.btn.btn-unmatch:hover {
+    background: #e63946;
+    color: #fff;
+}
+.no-matches {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+}
+.no-matches-content {
+    text-align: center;
+    color: #7f5af0;
+}
+.no-matches-content .btn {
+    margin-top: 1.2rem;
+}
+</style> 

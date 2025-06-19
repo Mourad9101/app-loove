@@ -32,7 +32,6 @@ class OnboardingController extends Controller {
             return;
         }
 
-        // Initialiser l'étape actuelle si ce n'est pas déjà fait
         if (!isset($_SESSION['onboarding_step'])) {
             $_SESSION['onboarding_step'] = 0;
         }

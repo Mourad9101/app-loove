@@ -96,50 +96,37 @@ class UserMatch {
 
     public function getUserMatches($userId) {
         try {
-            error_log("=== DÉBUT getUserMatches pour l'utilisateur $userId ===");
-            
-            // Requête optimisée pour récupérer les matchs mutuels
-            $sql = "SELECT DISTINCT 
-                    u.*,
-                    m1.created_at as match_date,
-                    COALESCE(last_msg.last_message_date, m1.created_at) as interaction_date
-                FROM users u
-                INNER JOIN matches m1 ON (m1.liked_user_id = u.id AND m1.user_id = :user_id)
-                INNER JOIN matches m2 ON (m2.user_id = m1.liked_user_id AND m2.liked_user_id = m1.user_id)
-                LEFT JOIN (
-                    SELECT 
-                        CASE 
-                            WHEN sender_id = :user_id THEN receiver_id
-                            ELSE sender_id
-                        END as other_user_id,
-                        MAX(created_at) as last_message_date
-                    FROM messages
-                    WHERE sender_id = :user_id OR receiver_id = :user_id
-                    GROUP BY other_user_id
-                ) last_msg ON last_msg.other_user_id = u.id
-                WHERE m1.user_id = :user_id
-                ORDER BY interaction_date DESC";
-            
-            error_log("Requête SQL : " . $sql);
-            
+            $sql = "SELECT 
+                        u.*,
+                        m1.created_at as match_date,
+                        msg.last_message_content,
+                        msg.last_message_date
+                    FROM users u
+                    INNER JOIN matches m1 ON (m1.liked_user_id = u.id AND m1.user_id = ?)
+                    INNER JOIN matches m2 ON (m2.user_id = m1.liked_user_id AND m2.liked_user_id = m1.user_id)
+                    LEFT JOIN (
+                        SELECT 
+                            CASE 
+                                WHEN sender_id = ? THEN receiver_id
+                                ELSE sender_id
+                            END as other_user_id,
+                            MAX(created_at) as last_message_date,
+                            SUBSTRING_INDEX(GROUP_CONCAT(message_content ORDER BY created_at DESC), ',', 1) as last_message_content
+                        FROM messages
+                        WHERE sender_id = ? OR receiver_id = ?
+                        GROUP BY other_user_id
+                    ) msg ON msg.other_user_id = u.id
+                    WHERE m1.user_id = ?
+                    ORDER BY msg.last_message_date DESC, m1.created_at DESC";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([':user_id' => $userId]);
-            
-            $matches = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            error_log("Nombre de matchs trouvés : " . count($matches));
-            
-            // Retirer les mots de passe et ajouter des informations supplémentaires
+            $stmt->execute([$userId, $userId, $userId, $userId, $userId]);
+            $matches = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             foreach ($matches as &$match) {
                 unset($match['password']);
-                $match['has_messaged'] = !is_null($match['interaction_date']);
-                error_log("Match trouvé : " . print_r($match, true));
             }
-            
-            error_log("=== FIN getUserMatches ===");
             return $matches;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             error_log("Erreur dans getUserMatches : " . $e->getMessage());
-            error_log("Trace : " . $e->getTraceAsString());
             return [];
         }
     }

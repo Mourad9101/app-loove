@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     last_login TIMESTAMP NULL,
     is_active BOOLEAN DEFAULT TRUE,
+    is_premium BOOLEAN DEFAULT FALSE,
+    daily_matches_count INT DEFAULT 0,
+    last_match_date DATE NULL,
     INDEX email_idx (email)
 ) ENGINE=InnoDB;
 
@@ -61,3 +64,18 @@ CREATE INDEX idx_users_city ON users(city);
 CREATE INDEX idx_users_gemstone ON users(gemstone);
 CREATE INDEX idx_messages_conversation ON messages(sender_id, receiver_id);
 CREATE INDEX idx_messages_read_status ON messages(read_at); 
+
+-- Table des abonnements
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    stripe_subscription_id VARCHAR(255) NOT NULL UNIQUE,
+    plan_type ENUM('premium', 'premium_plus') DEFAULT 'premium',
+    amount DECIMAL(10,2) NOT NULL,
+    status ENUM('active', 'cancelled', 'past_due', 'unpaid') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_subscription (user_id, status),
+    INDEX idx_stripe_subscription (stripe_subscription_id)
+) ENGINE=InnoDB; 
