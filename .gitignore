@@ -36,6 +36,6 @@ tmp/
 vendor/
 node_modules/
 
-# Fichiers uploads (optionnel, selon votre politique)
+# Fichiers uploads )
 uploads/*
 !uploads/.gitkeep 

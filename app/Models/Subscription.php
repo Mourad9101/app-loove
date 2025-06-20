@@ -174,4 +174,38 @@ class Subscription {
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row['total'] ?? 0;
     }
+
+    public function getSubscriptionStats() {
+        // Nombre d'abonnements par statut
+        $statusSql = "SELECT status, COUNT(*) as count 
+                     FROM subscriptions 
+                     GROUP BY status";
+        
+        // Revenus mensuels des 6 derniers mois
+        $revenueSql = "SELECT 
+                        DATE_FORMAT(created_at, '%Y-%m') as month,
+                        SUM(amount) as revenue
+                      FROM subscriptions 
+                      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+                      GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                      ORDER BY month DESC";
+        
+        // Types d'abonnements
+        $planSql = "SELECT plan_type, COUNT(*) as count 
+                   FROM subscriptions 
+                   WHERE status = 'active'
+                   GROUP BY plan_type";
+        
+        try {
+            $stats = [
+                'status' => $this->db->query($statusSql)->fetchAll(PDO::FETCH_ASSOC),
+                'revenue' => $this->db->query($revenueSql)->fetchAll(PDO::FETCH_ASSOC),
+                'plans' => $this->db->query($planSql)->fetchAll(PDO::FETCH_ASSOC)
+            ];
+            return $stats;
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la récupération des statistiques : " . $e->getMessage());
+            return false;
+        }
+    }
 } 

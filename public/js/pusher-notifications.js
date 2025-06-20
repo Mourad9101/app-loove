@@ -38,22 +38,29 @@ class PusherNotifications {
     }
 
     initializePusher() {
+        const PUSHER_APP_KEY = window.PUSHER_APP_KEY || '';
+        const PUSHER_APP_CLUSTER = window.PUSHER_APP_CLUSTER || 'eu';
+        const CURRENT_USER_ID = window.CURRENT_USER_ID || null;
+
         // Initialiser Pusher
-        const pusher = new Pusher(PUSHER_APP_KEY, {
-            cluster: PUSHER_APP_CLUSTER
-        });
+        if (PUSHER_APP_KEY && CURRENT_USER_ID) {
+            const pusher = new Pusher(PUSHER_APP_KEY, {
+                cluster: PUSHER_APP_CLUSTER
+            });
 
-        // S'abonner au canal de notifications
-        const channel = pusher.subscribe('notifications-channel');
+            // S'abonner au canal de notifications
+            const channel = pusher.subscribe('notifications-channel');
 
-        // Écouter les nouvelles notifications
-        channel.bind('new-notification', (data) => {
-            if (data.user_id === CURRENT_USER_ID) {
-                this.addNotification(data);
-                this.updateUnreadCount();
-                this.showNotificationToast(data);
-            }
-        });
+            // Écouter les nouvelles notifications
+            channel.bind('new-notification', (data) => {
+                console.log('Nouvelle notification reçue:', data);
+                if (data.user_id === CURRENT_USER_ID) {
+                    this.addNotification(data);
+                    this.updateUnreadCount();
+                    this.showNotificationToast(data);
+                }
+            });
+        }
     }
 
     setupEventListeners() {

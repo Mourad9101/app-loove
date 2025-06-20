@@ -59,8 +59,10 @@ class AuthController extends Controller {
 
     public function registerForm() {
         return $this->render('auth/register', [
-            'title' => 'Inscription - ' . APP_NAME
-        ]);
+            'title' => 'Inscription - ' . APP_NAME,
+            'bodyClass' => 'register-page',
+            'noLoginContainer' => true
+        ], 'auth/login_layout.php');
     }
 
     public function register() {
@@ -212,7 +214,9 @@ class AuthController extends Controller {
     public function forgotPasswordForm() {
         // Affiche le formulaire de demande de reset
         return $this->render('auth/forgot_password', [
-            'title' => 'Mot de passe oublié'
+            'title' => 'Mot de passe oublié',
+            'bodyClass' => 'forgot-page',
+            'noLoginContainer' => true
         ], 'auth/login_layout.php');
     }
 
@@ -271,7 +275,9 @@ class AuthController extends Controller {
         }
         return $this->render('auth/reset_password', [
             'title' => 'Réinitialiser le mot de passe',
-            'error' => $error
+            'error' => $error,
+            'bodyClass' => 'reset-page',
+            'noLoginContainer' => true
         ], 'auth/login_layout.php');
     }
 

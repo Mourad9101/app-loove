@@ -36,11 +36,28 @@ class AdminController extends Controller
         $users = $this->userModel->getAllUsers();
         $subscriptionModel = new \app\Models\Subscription();
         $revenue = $subscriptionModel->getTotalRevenue();
-        $this->render('admin/users', ['users' => $users, 'revenue' => $revenue]);
+        
+        // Statistiques des utilisateurs
+        $totalUsers = count($users);
+        $premiumUsers = count(array_filter($users, fn($user) => $user['is_premium'] ?? false));
+
+        $stats = [
+            'total_users' => $totalUsers,
+            'active_users' => count(array_filter($users, fn($user) => $user['is_active'] ?? false)),
+            'premium_users' => $premiumUsers,
+            'standard_users' => $totalUsers - $premiumUsers,
+            'admin_users' => count(array_filter($users, fn($user) => $user['is_admin'] ?? false)),
+            'revenue' => $revenue
+        ];
+        
+        $this->render('admin/users', [
+            'users' => $users, 
+            'revenue' => $revenue,
+            'stats' => $stats
+        ], 'layout/admin');
     }
 
-    public function toggleUserStatus(int $userId):
-        void
+    public function toggleUserStatus(int $userId): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $this->userModel->findById($userId);
@@ -58,10 +75,15 @@ class AdminController extends Controller
         }
     }
 
-    public function deleteUser(int $userId):
-        void
+    public function deleteUser(int $userId): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Empêcher un administrateur de se supprimer lui-même
+            if ($userId == $_SESSION['user_id']) {
+                $this->json(['success' => false, 'error' => 'Vous ne pouvez pas vous supprimer vous-même.']);
+                return;
+            }
+            
             $success = $this->userModel->deleteUser($userId);
             if ($success) {
                 $this->json(['success' => true]);
@@ -114,25 +136,44 @@ class AdminController extends Controller
     public function reports(): void
     {
         $reports = $this->reportModel->getAllReports();
-        $this->render('admin/reports', ['reports' => $reports]);
+        $reportStats = $this->reportModel->getReportsCount();
+        
+        $this->render('admin/reports', [
+            'reports' => $reports,
+            'stats' => $reportStats
+        ], 'layout/admin');
     }
 
     public function updateReportStatus(int $reportId): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $input = json_decode(file_get_contents('php://input'), true);
-            $status = $input['status'] ?? '';
+            $status = $input['status'] ?? null;
+            $notes = $input['notes'] ?? null;
 
-            if (!in_array($status, ['pending', 'reviewed', 'resolved'])) {
+            // Valider le statut seulement s'il est fourni
+            if ($status !== null && !in_array($status, ['pending', 'reviewed', 'resolved'])) {
                 $this->json(['success' => false, 'error' => 'Statut de signalement invalide.']);
                 return;
             }
+            
+            // Vérifier qu'au moins une action est demandée
+            if ($status === null && $notes === null) {
+                $this->json(['success' => false, 'error' => 'Aucune action spécifiée.']);
+                return;
+            }
 
-            $success = $this->reportModel->updateReportStatus($reportId, $status);
+            $success = $this->reportModel->updateReportStatus(
+                $reportId, 
+                $status, 
+                $_SESSION['user_id'],
+                $notes
+            );
+
             if ($success) {
-                $this->json(['success' => true, 'new_status' => $status]);
+                $this->json(['success' => true]);
             } else {
-                $this->json(['success' => false, 'error' => 'Échec de la mise à jour du statut du signalement.']);
+                $this->json(['success' => false, 'error' => 'Échec de la mise à jour du signalement.']);
             }
         }
     }
@@ -168,5 +209,41 @@ class AdminController extends Controller
                 $this->json(['success' => false, 'error' => 'Utilisateur non trouvé.']);
             }
         }
+    }
+
+    public function getSubscriptionStats(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $subscriptionModel = new \app\Models\Subscription();
+            $stats = $subscriptionModel->getSubscriptionStats();
+            
+            if ($stats) {
+                $this->json(['success' => true, 'stats' => $stats]);
+            } else {
+                $this->json(['success' => false, 'error' => 'Erreur lors de la récupération des statistiques.']);
+            }
+        }
+    }
+
+    public function dashboard(): void
+    {
+        // Statistiques générales pour le dashboard
+        $users = $this->userModel->getAllUsers();
+        $reports = $this->reportModel->getAllReports();
+        $subscriptionModel = new \app\Models\Subscription();
+        $revenue = $subscriptionModel->getTotalRevenue();
+        $reportStats = $this->reportModel->getReportsCount();
+        
+        $stats = [
+            'total_users' => count($users),
+            'active_users' => count(array_filter($users, fn($user) => $user['is_active'] ?? false)),
+            'premium_users' => count(array_filter($users, fn($user) => $user['is_premium'] ?? false)),
+            'admin_users' => count(array_filter($users, fn($user) => $user['is_admin'] ?? false)),
+            'total_reports' => $reportStats['total'],
+            'pending_reports' => $reportStats['pending'],
+            'revenue' => $revenue
+        ];
+        
+        $this->json($stats);
     }
 } 

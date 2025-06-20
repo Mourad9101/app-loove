@@ -67,7 +67,7 @@ class OnboardingController extends Controller {
             $mainImage = null;
             $uploadedImages = [];
             
-            // Vérifier si le dossier existe, sinon le créer
+            // Vérification si le dossier existe, sinon le créer
             if (!file_exists($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
                 error_log("Création du dossier uploads : " . $uploadDir);
@@ -83,7 +83,7 @@ class OnboardingController extends Controller {
                         $fileName = uniqid() . '.' . $extension;
                         $filePath = $uploadDir . $fileName;
                         
-                        // Vérifier le type de fichier
+                        // Vérification le type de fichier
                         $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
                         $fileType = $_FILES['photos']['type'][$key];
                         
@@ -261,9 +261,8 @@ class OnboardingController extends Controller {
         }
 
         $this->render('onboarding/city', [
-            'title' => 'Où habitez-vous ?',
+            'title' => 'Localisation',
             'progress' => ($this->getCurrentProgress()),
-            'description' => 'Trouvez des personnes près de chez vous'
         ], 'onboarding/layout.php');
     }
 

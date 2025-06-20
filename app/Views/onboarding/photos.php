@@ -1,7 +1,6 @@
 <form method="POST" action="<?= BASE_URL ?>/onboarding" enctype="multipart/form-data" id="photoForm">
     <div class="photo-upload-grid">
-        <?php for (
-            $i = 1; $i <= 4; $i++): ?>
+        <?php for ($i = 1; $i <= 4; $i++): ?>
             <div class="photo-upload-box" data-index="<?= $i ?>">
                 <input type="file" name="photos[]" accept="image/*" id="photo<?= $i ?>" <?= $i <= 2 ? 'required' : '' ?> class="photo-input">
                 <label for="photo<?= $i ?>" class="upload-label">
@@ -24,126 +23,8 @@
         Conseil : Choisissez des photos qui vous mettent en valeur. Les profils avec plusieurs photos ont plus de succès !
     </p>
 
-    <button type="submit" id="submitPhotos">Continuer</button>
+    <button type="submit" id="submitPhotos" class="next-button">Continuer</button>
 </form>
-
-<style>
-.photo-upload-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.photo-upload-box {
-    position: relative;
-    aspect-ratio: 1;
-    border: 2px dashed #e2e8f0;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.photo-upload-box:hover {
-    border-color: #4299e1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.photo-input {
-    display: none;
-}
-
-.upload-label {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    padding: 1rem;
-}
-
-.preview-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.preview-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-}
-
-.upload-icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    color: #4a5568;
-}
-
-.upload-text {
-    font-size: 0.875rem;
-    text-align: center;
-    color: #4a5568;
-}
-
-button[type="submit"] {
-    display: block;
-    margin: 20px auto 0 auto;
-    padding: 10px 20px;
-    background-color: #6c5ce7;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-button[type="submit"]:hover:not(:disabled) {
-    background-color: #a29bfe;
-}
-
-.step-description {
-    text-align: center;
-    color: #4a5568;
-    margin: 1rem 0;
-    font-size: 0.875rem;
-}
-
-input[type="file"]:focus {
-    border-color: #6c5ce7;
-    box-shadow: 0 0 0 3px #6c5ce766;
-}
-
-body, .onboarding-bg {
-    background: #f8f9fa;
-    min-height: 100vh;
-}
-
-.onboarding-card, .photos-card {
-    max-width: 500px;
-    margin: 40px auto 0 auto;
-    background: #fff;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.10);
-    padding: 2.5rem 2rem 2rem 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -192,3 +73,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script> 
+
+<script src="<?= BASE_URL ?>/js/onboarding.js"></script> 

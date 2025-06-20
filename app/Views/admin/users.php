@@ -1,124 +1,173 @@
 <?php require_once APP_PATH . '/Views/layout/header.php'; ?>
 
-<!-- Tailwind CSS CDN + FontAwesome -->
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/public/css/admin.css">
 
-<style>
-.main-header, .main-header a, .main-header span, .main-header .logo {
-    font-family: 'Poppins', sans-serif !important;
-    color: #222 !important;
-}
-
-.status-badge {
-    min-width: 80px;
-    display: inline-block;
-    text-align: center;
-}
-.action-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    justify-items: center;
-    align-items: center;
-}
-</style>
-
-<div class="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-100 py-10">
-  <div class="max-w-6xl mx-auto">
-    <h1 class="text-4xl font-extrabold text-center text-cyan-700 mb-10 tracking-tight font-sans">Admin Evergem</h1>
-    <?php if (isset($revenue)): ?>
-      <div class="flex justify-end mb-6">
-        <div class="bg-white rounded-2xl shadow-md px-8 py-6 flex flex-col items-center min-w-[220px]">
-          <div class="flex items-center gap-2 mb-2">
-            <i class="fa-solid fa-coins text-2xl text-yellow-400"></i>
-            <span class="text-lg font-semibold text-gray-700">Revenus Premium</span>
+<div class="admin-container">
+    <div class="admin-content">
+      <h1 class="admin-title">ADMIN PANEL</h1>
+        <nav class="admin-nav">
+          <div class="nav-links">
+            <a href="<?= BASE_URL ?>/admin" class="active">
+              <i class="fas fa-users"></i>
+              Utilisateurs
+            </a>
+            <a href="<?= BASE_URL ?>/admin/reports">
+              <i class="fas fa-flag"></i>
+              Signalements
+            </a>
+            <a href="<?= BASE_URL ?>/" target="_blank">
+              <i class="fas fa-external-link-alt"></i>
+              Voir le site
+            </a>
           </div>
-          <div class="text-3xl font-extrabold text-green-600"><?= number_format($revenue, 2) ?> €</div>
-          <div class="text-xs text-gray-400 mt-1">Total généré</div>
+        </nav>
+
+        <?php if (isset($stats)): ?>
+          <div class="stats-container mb-4">
+            <div class="stat-row">
+              <div class="stat-card">
+                <h5>Total Utilisateurs</h5>
+                <p><?= $stats['total_users'] ?></p>
+              </div>
+              <div class="stat-card">
+                <h5>Utilisateurs Actifs</h5>
+                <p><?= $stats['active_users'] ?></p>
+              </div>
+              <div class="stat-card">
+                <h5>Utilisateurs Premium</h5>
+                <p><?= $stats['premium_users'] ?></p>
+              </div>
+              <div class="stat-card">
+                <h5>Administrateurs</h5>
+                <p><?= $stats['admin_users'] ?></p>
+              </div>
+              <div class="stat-card">
+                <h5>Revenus Totaux</h5>
+                <p><?= number_format($stats['revenue'], 2) ?> €</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="subscription-stats mb-4">
+            <div class="charts-row">
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Statuts des Abonnements</h5>
+                    <canvas id="statusChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Revenus Mensuels</h5>
+                    <canvas id="revenueChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Répartition des Utilisateurs</h5>
+                    <canvas id="planChart" data-stats='<?= json_encode([
+                        'premium' => $stats['premium_users'] ?? 0,
+                        'standard' => $stats['standard_users'] ?? 0
+                    ]) ?>'></canvas>
+                  </div>
+                </div>
+              </div>
         </div>
       </div>
     <?php endif; ?>
-    <div class="bg-white/90 rounded-3xl shadow-xl p-8">
-      <h2 class="text-2xl font-bold text-cyan-700 mb-6">Gestion des Utilisateurs</h2>
+        
+        <div class="admin-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Gestion des Utilisateurs</h2>
+            <div class="user-count">
+              <i class="fas fa-users"></i>
+              <?= count($users ?? []) ?> utilisateur(s)
+            </div>
+          </div>
+          
     <?php if (isset($_SESSION['success'])): ?>
-        <div class="mb-4 p-3 rounded bg-emerald-100 text-emerald-800 font-semibold">
+            <div class="alert success">
             <?= $_SESSION['success']; ?>
             <?php unset($_SESSION['success']); ?>
         </div>
     <?php endif; ?>
     <?php if (isset($_SESSION['error'])): ?>
-        <div class="mb-4 p-3 rounded bg-rose-100 text-rose-800 font-semibold">
+            <div class="alert error">
             <?= $_SESSION['error']; ?>
             <?php unset($_SESSION['error']); ?>
         </div>
     <?php endif; ?>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm font-medium">
+
+          <div class="table-container">
+            <table class="admin-table">
         <thead>
-            <tr class="bg-cyan-100 text-cyan-700">
-              <th class="py-3 px-4 rounded-tl-2xl">ID</th>
-              <th class="py-3 px-4">Photo</th>
-              <th class="py-3 px-4">Email</th>
-              <th class="py-3 px-4">Prénom</th>
-              <th class="py-3 px-4">Nom</th>
-              <th class="py-3 px-4">Statut</th>
-              <th class="py-3 px-4">Premium</th>
-              <th class="py-3 px-4">Admin</th>
-              <th class="py-3 px-4 rounded-tr-2xl">Actions</th>
+                <tr>
+                  <th>ID</th>
+                  <th>Photo</th>
+                  <th>Email</th>
+                  <th>Prénom</th>
+                  <th>Nom</th>
+                  <th>Statut</th>
+                  <th>Premium</th>
+                  <th>Admin</th>
+                  <th>Actions</th>
             </tr>
         </thead>
-          <tbody class="bg-white">
+              <tbody>
             <?php if (!empty($users)): ?>
                 <?php foreach ($users as $user): ?>
-                <tr class="border-b last:border-0 hover:bg-cyan-50 transition">
-                  <td class="py-3 px-4 text-gray-700 font-semibold"><?= htmlspecialchars($user['id']) ?></td>
-                  <td class="py-3 px-4">
-                    <div class="flex items-center justify-center">
+                    <tr>
+                      <td><?= htmlspecialchars($user['id']) ?></td>
+                      <td>
+                        <div class="user-photo">
                       <img src="<?= BASE_URL ?>/public/uploads/<?= htmlspecialchars($user['image'] ?? 'default.jpg') ?>"
                            alt="Photo de profil"
-                           class="w-12 h-12 rounded-full object-cover border-2 border-cyan-200 shadow-sm bg-white"
                            onerror="this.src='<?= BASE_URL ?>/public/uploads/default.jpg'">
                     </div>
                   </td>
-                  <td class="py-3 px-4 text-gray-700"><?= htmlspecialchars($user['email']) ?></td>
-                  <td class="py-3 px-4 text-gray-700"><?= htmlspecialchars($user['first_name']) ?></td>
-                  <td class="py-3 px-4 text-gray-700"><?= htmlspecialchars($user['last_name']) ?></td>
-                  <td class="py-3 px-4 text-center">
-                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold status-badge
-                      <?= ($user['is_active'] ?? 0) ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' ?>">
+                      <td><?= htmlspecialchars($user['email']) ?></td>
+                      <td><?= htmlspecialchars($user['first_name']) ?></td>
+                      <td><?= htmlspecialchars($user['last_name']) ?></td>
+                      <td>
+                        <span class="status-badge <?= ($user['is_active'] ?? 0) ? 'active' : 'inactive' ?>">
                                 <?= ($user['is_active'] ?? 0) ? 'Actif' : 'Désactivé' ?>
                             </span>
                         </td>
-                  <td class="py-3 px-4 text-center">
-                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold
-                      <?= ($user['is_premium'] ?? 0) ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-200 text-gray-700' ?>">
+                      <td>
+                        <span class="status-badge <?= ($user['is_premium'] ?? 0) ? 'premium' : 'not-premium' ?>">
                                 <?= ($user['is_premium'] ?? 0) ? 'Oui' : 'Non' ?>
                             </span>
                         </td>
-                  <td class="py-3 px-4 text-center">
-                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold
-                      <?= ($user['is_admin'] ?? 0) ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-200 text-gray-700' ?>">
+                      <td>
+                        <span class="status-badge <?= ($user['is_admin'] ?? 0) ? 'admin' : 'not-admin' ?>">
                                 <?= ($user['is_admin'] ?? 0) ? 'Oui' : 'Non' ?>
                             </span>
                         </td>
-                  <td class="py-3 px-4 text-center">
+                      <td>
                     <div class="action-grid">
-                      <button class="p-2 rounded-full border-2 border-yellow-400 bg-white text-yellow-500 hover:bg-yellow-400 shadow transition" title="Désactiver/Activer"
+                          <button class="action-button status" title="Désactiver/Activer"
                         onclick="toggleUserStatus(<?= $user['id'] ?>, <?= json_encode((bool)($user['is_active'] ?? 0)) ?>)">
                         <i class="fa-solid fa-user-check"></i>
                             </button>
-                      <button class="p-2 rounded-full border-2 border-green-500 bg-white text-green-500 hover:bg-green-500 shadow transition" title="Promouvoir Premium"
+                          <button class="action-button premium" title="Promouvoir Premium"
                         onclick="togglePremiumStatus(<?= $user['id'] ?>, <?= json_encode((bool)($user['is_premium'] ?? 0)) ?>)">
                         <i class="fa-solid fa-gem"></i>
                             </button>
-                      <button class="p-2 rounded-full border-2 border-blue-500 bg-white text-blue-500 hover:bg-blue-500 shadow transition" title="Promouvoir Admin"
-                        onclick="toggleAdminStatus(<?= $user['id'] ?>, <?= json_encode((bool)($user['is_admin'] ?? 0)) ?>)" <?= ($user['id'] == $_SESSION['user_id']) ? 'disabled' : '' ?>>
+                          <button class="action-button admin" title="Promouvoir Admin"
+                            onclick="toggleAdminStatus(<?= $user['id'] ?>, <?= json_encode((bool)($user['is_admin'] ?? 0)) ?>)"
+                            <?= ($user['id'] == $_SESSION['user_id']) ? 'disabled' : '' ?>>
                         <i class="fa-solid fa-user-shield"></i>
                             </button>
-                      <button class="p-2 rounded-full border-2 border-red-500 bg-white text-red-500 hover:bg-red-500 shadow transition" title="Supprimer"
-                        onclick="deleteUser(<?= $user['id'] ?>)">
+                          <button class="action-button delete" title="Supprimer"
+                            onclick="deleteUser(<?= $user['id'] ?>)"
+                            <?= ($user['id'] == $_SESSION['user_id']) ? 'disabled' : '' ?>>
                         <i class="fa-solid fa-trash"></i>
                             </button>
                     </div>
@@ -127,7 +176,7 @@
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                <td colspan="9" class="text-center py-8 text-gray-500">Aucun utilisateur trouvé.</td>
+                    <td colspan="9" class="empty-message">Aucun utilisateur trouvé.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
@@ -138,7 +187,11 @@
 </div>
 
 <script>
-    window.BASE_URL = '<?= BASE_URL ?>';
+    const BASE_URL = "<?= BASE_URL ?>";
 </script>
-<script src="<?= BASE_URL ?>/public/js/admin.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="<?= BASE_URL ?>/public/js/admin.js"></script>
+
+</body>
+</html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?> - EverGem</title>
-    <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/css/style.css">
     <style>
         .onboarding-container {
             max-width: 500px;
@@ -86,19 +86,19 @@
         }
 
         .option-card:hover {
-            border-color: #FF3366;
+            border-color: #6c5ce7;
             transform: translateY(-2px);
         }
 
         .option-card.selected {
-            border-color: #FF3366;
-            background: rgba(255, 51, 102, 0.05);
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.05);
         }
 
         .next-button {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(45deg, #FF3366, #FF6B3D);
+            background: #6c5ce7;
             color: white;
             border: none;
             border-radius: 25px;
@@ -166,7 +166,7 @@
         }
 
         .interest-tag.selected {
-            background: #FF3366;
+            background: #6c5ce7;
             color: white;
         }
 
@@ -183,7 +183,7 @@
         }
 
         .bio-textarea:focus {
-            border-color: #FF3366;
+            border-color: #6c5ce7;
             outline: none;
         }
 
@@ -197,7 +197,7 @@
         }
 
         .option-card.selected svg {
-            stroke: #FF3366;
+            stroke: #6c5ce7;
         }
 
         body, .onboarding-bg {

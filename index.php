@@ -85,6 +85,7 @@ try {
 
     // Routes d'administration
     $router->addRoute('GET', BASE_URL . '/admin', 'AdminController@index');
+    $router->addRoute('GET', BASE_URL . '/admin/dashboard', 'AdminController@dashboard');
     $router->addRoute('POST', BASE_URL . '/admin/user/{id}/toggle-status', 'AdminController@toggleUserStatus');
     $router->addRoute('POST', BASE_URL . '/admin/user/{id}/toggle-premium-status', 'AdminController@toggleUserPremiumStatus');
     $router->addRoute('POST', BASE_URL . '/admin/user/{id}/toggle-admin-status', 'AdminController@toggleAdminStatus');
@@ -93,6 +94,9 @@ try {
     // Routes de gestion des signalements
     $router->addRoute('GET', BASE_URL . '/admin/reports', 'AdminController@reports');
     $router->addRoute('POST', BASE_URL . '/admin/report/{id}/update-status', 'AdminController@updateReportStatus');
+
+    // Route pour les statistiques d'abonnement
+    $router->addRoute('GET', BASE_URL . '/admin/subscription-stats', 'AdminController@getSubscriptionStats');
 
     // Route de signalement des utilisateurs
     $router->addRoute('POST', BASE_URL . '/report/{id}', 'ReportController@create');

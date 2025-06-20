@@ -124,7 +124,7 @@
                                 <?php endif; ?>
                             <?php endif; ?>
 
-                            <!-- Ajouter de nouvelles photos -->
+                            <!-- Ajout de nouvelles photos -->
                             <div class="add-new-photos">
                                 <h6>Ajouter de nouvelles photos :</h6>
                                 <div class="row">

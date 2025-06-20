@@ -94,8 +94,10 @@ function getGemColor($gemstone) {
                     <small class="form-text text-muted">Distance maximale depuis votre localisation.</small>
                 </div>
             </div>
+            <div class="btn-container">
             <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter"></i> Appliquer les filtres</button>
             <a href="<?= BASE_URL ?>/discover" class="btn btn-secondary btn-sm"><i class="fas fa-sync"></i> Réinitialiser</a>
+            </div>
         </form>
     </div>
     <?php else: ?>
@@ -105,6 +107,7 @@ function getGemColor($gemstone) {
     <?php endif; ?>
 
     <div class="profiles-stack" id="profiles-stack">
+        <?php if (!empty($users)): ?>
         <?php foreach ($users as $index => $user): ?>
             <div class="profile-card" data-user-id="<?= htmlspecialchars($user['id'] ?? '') ?>" data-index="<?= $index ?>" style="z-index: <?= count($users) - $index ?>">
                 <div class="profile-image" style="background-image: url('<?= BASE_URL ?>/public/uploads/<?= htmlspecialchars($user['image'] ?? '') ?>')">
@@ -154,6 +157,15 @@ function getGemColor($gemstone) {
                  </div>
             </div>
         <?php endforeach; ?>
+        <?php else: ?>
+            <div class="no-profiles">
+                <div>
+                    <i class="fas fa-search-minus" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h4>Aucun profil trouvé</h4>
+                    <p>Essayez d'élargir vos critères de recherche.</p>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
     <?php
