@@ -1,0 +1,115 @@
+:root {
+    /* Couleurs principales */
+    --primary-color: #4299e1;
+    --secondary-color: #ed64a6;
+    --accent-color: #f6ad55;
+    
+    /* Arrière-plans */
+    --background-color: #f7fafc;
+    --card-background: #ffffff;
+    --overlay-background: rgba(0, 0, 0, 0.5);
+    
+    /* Texte */
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --text-light: #ffffff;
+    
+    /* Bordures et ombres */
+    --border-radius-sm: 8px;
+    --border-radius: 20px;
+    --border-radius-lg: 30px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    /* Espacement */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Typographie */
+    --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-md: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Z-index */
+    --z-index-dropdown: 1000;
+    --z-index-modal: 2000;
+    --z-index-tooltip: 3000;
+}
+
+/* Classes d'utilité */
+.text-primary {
+    color: var(--text-primary);
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+}
+
+.text-light {
+    color: var(--text-light);
+}
+
+.bg-primary {
+    background-color: var(--primary-color);
+}
+
+.bg-secondary {
+    background-color: var(--secondary-color);
+}
+
+.shadow {
+    box-shadow: var(--shadow);
+}
+
+.shadow-lg {
+    box-shadow: var(--shadow-lg);
+}
+
+.rounded {
+    border-radius: var(--border-radius);
+}
+
+.rounded-lg {
+    border-radius: var(--border-radius-lg);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in {
+    animation: fadeIn var(--transition-normal);
+}
+
+.animate-slide-up {
+    animation: slideUp var(--transition-normal);
+}
+
+.animate-scale-in {
+    animation: scaleIn var(--transition-normal);
+} 

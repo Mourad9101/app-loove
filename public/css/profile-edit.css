@@ -1,0 +1,45 @@
+.form-control:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 0.2rem rgba(66, 153, 225, 0.25);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+    background-color: #a0aec0;
+    border-color: #a0aec0;
+}
+
+.btn-secondary:hover {
+    background-color: #718096;
+    border-color: #718096;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.photo-upload-box {
+    position: relative !important;
+    overflow: hidden !important;
+}
+.add-new-photos .row {
+    overflow: hidden;
+}
+.photo-upload-box input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+} 

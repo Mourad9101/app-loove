@@ -1,0 +1,54 @@
+# Dépendances gérées par Composer
+/vendor/
+
+# Fichier d'environnement et de configuration locale
+.env
+
+# Fichiers générés par l'utilisateur (uploads)
+/public/uploads/
+
+# Fichiers de log
+*.log
+logs/
+
+# Fichiers système et IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Variables d'environnement
+.env.local
+.env.production
+.env.staging
+
+# Fichiers de configuration sensibles
+config/database.php
+config/stripe.php
+
+# Fichiers temporaires
+*.tmp
+*.temp
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Dossiers de cache
+cache/
+tmp/
+
+# Fichiers de sauvegarde
+*.bak
+*.backup
+
+# Fichiers de configuration IDE
+.idea/
+.vscode/
+
+# Dépendances
+node_modules/
+
+# Fichiers uploads )
+uploads/*
+!uploads/.gitkeep 

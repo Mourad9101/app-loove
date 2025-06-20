@@ -1,0 +1,11 @@
+.list-group-item {
+    transition: background-color 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: rgba(108, 92, 231, 0.05);
+}
+
+.text-muted {
+    color: #6c757d !important;
+} 
