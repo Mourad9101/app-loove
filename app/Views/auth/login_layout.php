@@ -16,5 +16,6 @@
     <?php else: ?>
         <?= $content ?>
     <?php endif; ?>
+    <script src="<?= BASE_URL ?>/public/js/auth.js"></script>
 </body>
 </html> 

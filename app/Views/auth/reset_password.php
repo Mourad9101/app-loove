@@ -26,5 +26,4 @@
             <a href="<?= BASE_URL ?>/login">Retour à la connexion</a>
         </div>
     </div>
-</div>
-<script src="<?= BASE_URL ?>/public/js/auth.js"></script> 
+</div> 

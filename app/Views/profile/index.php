@@ -1,13 +1,6 @@
 <?php require_once APP_PATH . '/Views/layout/header.php'; ?>
 
 <div class="container mt-5">
-    <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success">
-            <?= $_SESSION['success']; ?>
-            <?php unset($_SESSION['success']); ?>
-        </div>
-    <?php endif; ?>
-
     <?php if (isset($_SESSION['error'])): ?>
         <div class="alert alert-danger">
             <?= $_SESSION['error']; ?>

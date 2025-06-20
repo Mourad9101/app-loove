@@ -40,5 +40,4 @@
         </form>
     </div>
 </div>
-<script src="<?= BASE_URL ?>/public/js/auth.js"></script>
 <?php unset($_SESSION['old_input']); ?> 
