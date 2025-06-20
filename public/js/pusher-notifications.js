@@ -44,22 +44,22 @@ class PusherNotifications {
 
         // Initialiser Pusher
         if (PUSHER_APP_KEY && CURRENT_USER_ID) {
-            const pusher = new Pusher(PUSHER_APP_KEY, {
-                cluster: PUSHER_APP_CLUSTER
-            });
+        const pusher = new Pusher(PUSHER_APP_KEY, {
+            cluster: PUSHER_APP_CLUSTER
+        });
 
-            // S'abonner au canal de notifications
-            const channel = pusher.subscribe('notifications-channel');
+        // S'abonner au canal de notifications
+        const channel = pusher.subscribe('notifications-channel');
 
-            // Écouter les nouvelles notifications
-            channel.bind('new-notification', (data) => {
+        // Écouter les nouvelles notifications
+        channel.bind('new-notification', (data) => {
                 console.log('Nouvelle notification reçue:', data);
-                if (data.user_id === CURRENT_USER_ID) {
-                    this.addNotification(data);
-                    this.updateUnreadCount();
-                    this.showNotificationToast(data);
-                }
-            });
+            if (data.user_id === CURRENT_USER_ID) {
+                this.addNotification(data);
+                this.updateUnreadCount();
+                this.showNotificationToast(data);
+            }
+        });
         }
     }
 

@@ -1289,11 +1289,11 @@ body {
     .profile-name {
         font-size: 1.5rem;
     }
-    
+
     .profile-location {
         font-size: 0.9rem;
     }
-    
+
     .profile-distance {
         font-size: 0.9rem;
         padding: 0.4rem 0.8rem;
@@ -1312,12 +1312,12 @@ body {
     .btn-action i {
         font-size: 1.8rem;
     }
-    
+
     .advanced-filters-section .btn {
         width: 100%;
         margin-bottom: 0.5rem;
     }
-    
+
     .match-limit-info {
         padding: 1rem;
         background: var(--card-background);
@@ -1993,7 +1993,7 @@ body {
         max-width: 440px;
         margin: 32px auto;
     }
-}
+} 
 
 /* Tablettes et petits écrans */
 @media (min-width: 768px) {

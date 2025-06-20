@@ -10,9 +10,9 @@
 </head>
 <body class="<?= $bodyClass ?? '' ?>">
     <?php if (empty($noLoginContainer)): ?>
-        <div class="login-container">
-            <?= $content ?>
-        </div>
+    <div class="login-container">
+        <?= $content ?>
+    </div>
     <?php else: ?>
         <?= $content ?>
     <?php endif; ?>
